@@ -1050,33 +1050,6 @@
         </div>
       </div>
 
-      <!-- Akansha's Pitch & Judge Q&A Card -->
-      <div class="glass-card p-4 sm:p-6 rounded-2xl border-l-4 border-emerald-400">
-        <div class="flex items-center gap-2 text-emerald-400 font-black text-xs sm:text-sm uppercase tracking-wider mb-2">
-          <i data-lucide="mic" class="w-4 h-4"></i> Akansha's 30-Second SIH Judge Pitch (Database & Storage Lead)
-        </div>
-        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed italic mb-4">
-          "Hello Judges! I designed and built the <strong>Database Architecture and Data Management Layer (Layer 2)</strong>. I developed the 3NF relational SQLite schema to ingest, index, and organize live telemetry across 12 Indian districts. My architecture features sub-millisecond B-Tree queries, foreign-key data integrity, and time-series partitioning. This ensures that Bhavishya's data processing, Deep's AI forecasting pipeline, and Saurav's live frontend visualisations receive reliable, lightning-fast data streams without any bottleneck."
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-          <div>
-            <strong class="text-emerald-300 font-bold block mb-0.5">Judge Q: "Why SQLite for Hackathon MVP & how will it scale?"</strong>
-            <p class="text-slate-400 text-[11px]">
-              "SQLite in WAL mode provides zero-configuration, lightning speed, and serverless reliability for local demo nodes. Our schema strictly follows ANSI-SQL standards, allowing a 1-click migration to PostgreSQL or TimescaleDB for multi-state production deployments."
-            </p>
-          </div>
-          <div>
-            <strong class="text-sky-300 font-bold block mb-0.5">Judge Q: "How does your DB handle missing sensor packets?"</strong>
-            <p class="text-slate-400 text-[11px]">
-              "We implement database-level check constraints and fallback triggers that route null readings to Layer 3 (Bhavishya's Python pipeline) for KNN interpolation before AI scoring."
-            </p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
     <!-- ================= TAB 6: ARCHITECTURE & TEAM ================= -->
     <div id="architecture-tab" class="tab-panel hidden space-y-4 sm:space-y-6">
       
