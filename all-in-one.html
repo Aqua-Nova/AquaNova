@@ -1,0 +1,3710 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Water Intelligence — AI-Powered Water Monitoring & Prediction (SIH 2026)</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#0c192c',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#050811'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Leaflet.js CSS & JS CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Cyber Styles -->
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+
+:root {
+  --bg-dark: #050811;
+  --card-dark: rgba(13, 20, 36, 0.85);
+  --border-cyan: rgba(56, 189, 248, 0.28);
+  --neon-cyan: #38bdf8;
+  --neon-blue: #3b82f6;
+  --neon-emerald: #10b981;
+  --neon-orange: #f97316;
+  --neon-rose: #f43f5e;
+  --neon-purple: #a855f7;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.18) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 55%),
+    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Cyber Glassmorphism HUD Card */
+.glass-card {
+  background: var(--card-dark);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-cyan);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 0 15px -3px rgba(14, 165, 233, 0.15);
+  border-radius: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.6), transparent);
+  pointer-events-none;
+}
+
+.glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.8),
+    0 0 25px -2px rgba(14, 165, 233, 0.35);
+  transform: translateY(-2px);
+}
+
+/* Picture Telemetry Card with Image Overlay */
+.photo-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.photo-card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.45) saturate(1.2) contrast(1.1);
+  transition: transform 0.6s ease;
+}
+
+.photo-card:hover .photo-card-bg {
+  transform: scale(1.05);
+}
+
+.photo-card-overlay {
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(5, 8, 17, 0.2) 0%, rgba(5, 8, 17, 0.95) 100%);
+  padding: 1.25rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Dashboard View Switcher Button */
+.view-btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(15, 23, 42, 0.7);
+  color: #94a3b8;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.view-btn.active-view {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+/* Cyber Neon Buttons */
+.cyber-btn {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0c4a6e 100%);
+  border: 1px solid #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+}
+
+.cyber-btn:hover {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: scale(1.02);
+}
+
+.cyber-btn:active {
+  transform: scale(0.97);
+}
+
+/* Neon Text Glow */
+.glow-text-cyan {
+  text-shadow: 0 0 14px rgba(56, 189, 248, 0.7), 0 0 28px rgba(56, 189, 248, 0.3);
+}
+
+.glow-text-emerald {
+  text-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+}
+
+.glow-text-rose {
+  text-shadow: 0 0 14px rgba(244, 63, 94, 0.7);
+}
+
+/* Mini Progress Bar in Cards */
+.cyber-progress-track {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 9999px;
+  height: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cyber-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* Leaflet Map Dark Cyber Theme */
+#map {
+  height: 380px;
+  width: 100%;
+  border-radius: 1rem;
+  z-index: 10;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 640px) {
+  #map {
+    height: 480px;
+    border-radius: 1.25rem;
+  }
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(10, 16, 30, 0.95) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  border-radius: 0.85rem !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(10, 16, 30, 0.95) !important;
+}
+
+/* Radar Pulse for Map Markers */
+.radar-pulse-marker {
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+  animation: radar-pulse 2s infinite cubic-bezier(0.36, 0.11, 0.89, 0.32);
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 16px rgba(56, 189, 248, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+/* Navigation Tabs */
+.tab-btn {
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.tab-btn.active-tab {
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.22) 0%, rgba(56, 189, 248, 0.02) 100%);
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+/* Dynamic Value Update Highlight */
+@keyframes flash-green {
+  0% { color: #38bdf8; text-shadow: 0 0 16px rgba(56, 189, 248, 1); transform: scale(1.04); }
+  50% { color: #34d399; text-shadow: 0 0 20px rgba(52, 211, 153, 1); }
+  100% { color: inherit; text-shadow: none; transform: scale(1); }
+}
+
+.flash-update {
+  animation: flash-green 0.75s ease-out;
+}
+
+/* Live Pulse Indicator */
+@keyframes live-ping {
+  0% { transform: scale(1); opacity: 1; }
+  75%, 100% { transform: scale(2.4); opacity: 0; }
+}
+
+.animate-live-ping {
+  animation: live-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.spinning-icon {
+  animation: spin 0.6s linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Shake Animation for Wrong PIN */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+  animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #050811; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+
+</style>
+</head>
+<body class="min-h-screen flex flex-col antialiased text-slate-100 bg-[#050811]">
+
+  <!-- ================= PIN LOCK SCREEN MODAL OVERLAY ================= -->
+  <div id="lockModal" class="fixed inset-0 z-[999] flex items-center justify-center bg-[#050811]/90 backdrop-blur-2xl p-4 transition-all duration-300">
+    <div id="lockCard" class="w-full max-w-sm sm:max-w-md bg-slate-900/95 border border-sky-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-sky-950/80 text-center relative overflow-hidden">
+      
+      <!-- Decorative Neon Top Glow -->
+      <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-24 bg-sky-500/30 blur-3xl rounded-full pointer-events-none"></div>
+
+      <!-- Lock Icon Badge -->
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 mx-auto flex items-center justify-center text-white shadow-lg shadow-sky-500/40 mb-3.5 border border-sky-300/40">
+        <i data-lucide="shield-check" class="w-8 h-8"></i>
+      </div>
+
+      <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-sky-950 text-sky-400 border border-sky-500/50 inline-block mb-2 shadow-xs">
+        Secure Protected Node · SIH 2026
+      </span>
+
+      <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight glow-text-cyan mb-1">
+        Water Intelligence
+      </h2>
+      <p class="text-xs text-slate-400 mb-5 sm:mb-6">
+        Enter the 4-digit security PIN to access the live dashboard.
+      </p>
+
+      <!-- PIN Input Box -->
+      <div class="space-y-3.5 sm:space-y-4">
+        <div class="relative">
+          <input 
+            type="password" 
+            id="pinInput" 
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="4" 
+            placeholder="••••" 
+            autocomplete="off"
+            class="w-full bg-slate-950 border-2 border-slate-700 focus:border-sky-400 rounded-2xl py-3 sm:py-3.5 px-4 text-center text-2xl font-black tracking-[0.5em] text-white focus:outline-none focus:ring-4 focus:ring-sky-500/30 transition shadow-inner"
+          />
+        </div>
+
+        <!-- Error Message -->
+        <p id="pinErrorMsg" class="text-xs font-bold text-rose-400 hidden flex items-center justify-center gap-1.5">
+          <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Incorrect Security PIN. Try 2026.
+        </p>
+
+        <!-- Unlock Button -->
+        <button 
+          id="unlockBtn" 
+          class="w-full cyber-btn text-white font-black text-xs sm:text-sm py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <i data-lucide="key-round" class="w-4 h-4"></i> Unlock Cyber Dashboard
+        </button>
+
+        <div class="pt-1.5">
+          <span class="text-[10px] sm:text-[11px] text-slate-500">Authorized Team & Judge Access Only</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= TOP NAVIGATION BAR (FUTURISTIC HUD) ================= -->
+  <header class="bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 shadow-lg shadow-black/50">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14 sm:h-16 gap-2">
+        
+        <!-- Logo & Project Identity -->
+        <div class="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sky-400 via-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-sky-500/30 border border-sky-400/30">
+            <i data-lucide="droplet" class="w-5 h-5 fill-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-black text-sm sm:text-lg tracking-tight text-white glow-text-cyan">WATER INTELLIGENCE</span>
+              <span class="text-[9px] sm:text-[10px] font-black uppercase px-1.5 sm:px-2 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-500/40">SIH 2026</span>
+            </div>
+            <p class="text-[10px] text-slate-400 hidden md:block">AI-Powered Water Monitoring, Prediction & Early Warning</p>
+          </div>
+        </div>
+
+        <!-- Controls: Region Selector, Live Telemetry, Refresh & Lock -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- Region Dropdown -->
+          <div class="flex items-center bg-slate-900/90 p-1 sm:p-1.5 rounded-xl border border-sky-500/30 shadow-inner">
+            <select id="regionSelect" class="bg-slate-950 text-[11px] sm:text-sm font-bold text-sky-400 py-1 px-2 sm:px-3 rounded-lg border border-slate-800 focus:ring-2 focus:ring-sky-500 cursor-pointer outline-none max-w-[130px] sm:max-w-none truncate">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <!-- Live Refresh Button -->
+          <button id="btnManualRefresh" class="p-1.5 sm:p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-sky-400 border border-slate-800 transition active:scale-95 flex items-center gap-1.5 text-xs font-bold cursor-pointer" title="Fetch Fresh Live Telemetry">
+            <i id="refreshIcon" data-lucide="refresh-cw" class="w-4 h-4 text-sky-400"></i>
+            <span class="hidden md:inline">Fetch Live</span>
+          </button>
+
+          <!-- Live Streaming Auto-Update Toggle -->
+          <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 px-2.5 py-1.5 rounded-xl border border-slate-800">
+            <span class="relative flex h-2 w-2">
+              <span id="livePulsePing" class="animate-live-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span id="livePulseDot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span id="liveStatusText" class="text-[11px] font-bold text-emerald-300">Live Stream (6s)</span>
+            <label class="relative inline-flex items-center cursor-pointer ml-1" title="Toggle Live Telemetry Auto-Stream">
+              <input type="checkbox" id="autoStreamToggle" class="sr-only peer" checked>
+              <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-800 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-white"></div>
+            </label>
+          </div>
+
+          <!-- Re-Lock Screen Button -->
+          <button id="btnLockScreen" class="p-1.5 sm:p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-sky-400 border border-slate-800 transition active:scale-95 shrink-0 cursor-pointer" title="Lock Dashboard Screen">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sub-Navbar Navigation Tabs -->
+    <div class="border-t border-slate-800/80 bg-slate-950/60 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex space-x-1.5 overflow-x-auto no-scrollbar py-1">
+        <button data-tab-target="dashboard-tab" class="tab-btn active-tab px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 border-sky-400 text-sky-400 flex items-center gap-1.5 rounded-lg shrink-0">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Live Dashboard
+        </button>
+        <button data-tab-target="map-view-tab" class="tab-btn px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 rounded-lg shrink-0">
+          <i data-lucide="map" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Risk Map
+        </button>
+        <button data-tab-target="analytics-tab" class="tab-btn px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 rounded-lg shrink-0">
+          <i data-lucide="line-chart" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> AI Trends
+        </button>
+        <!-- Kanika's Dedicated Research & Decision Engine Tab -->
+        <button data-tab-target="research-hub-tab" class="tab-btn px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 rounded-lg shrink-0">
+          <i data-lucide="microscope" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400"></i> Research & Risk Engine (Kanika)
+        </button>
+        <!-- Akansha's Dedicated Database & SQL Telemetry Tab -->
+        <button data-tab-target="database-hub-tab" class="tab-btn px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 rounded-lg shrink-0">
+          <i data-lucide="database" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400"></i> Database & SQL (Akansha)
+        </button>
+        <button data-tab-target="architecture-tab" class="tab-btn px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 rounded-lg shrink-0">
+          <i data-lucide="git-merge" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Architecture & Team
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+
+    <!-- ================= TAB 1: LIVE DASHBOARD ================= -->
+    <div id="dashboard-tab" class="tab-panel space-y-4 sm:space-y-6">
+
+      <!-- Header & Active Region Status Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-card p-3.5 sm:p-5 rounded-2xl border border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="regionTitle" class="text-xl sm:text-2xl font-black text-white tracking-tight glow-text-cyan">Delhi NCR</h2>
+            <span class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-black uppercase bg-sky-950 text-sky-400 border border-sky-500/40 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active Telemetry Node
+            </span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 mt-0.5">
+            <p id="regionSubtitle" class="text-[11px] sm:text-xs text-slate-400">Monitoring Zone: Delhi · Real-time Sensor Ingestion</p>
+            <span class="text-slate-600 hidden sm:inline">•</span>
+            <span id="lastUpdatedBadge" class="text-[10px] font-bold text-sky-300 bg-sky-950/70 px-2 py-0.5 rounded border border-sky-500/30">
+              Updated: Just now
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Live Status Badge -->
+          <div id="statusBadge" class="px-3.5 py-1.5 rounded-xl font-black text-xs sm:text-sm tracking-wider border flex items-center gap-1.5 bg-orange-950/80 text-orange-300 border-orange-500/50 shadow-lg shadow-orange-950/30">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i> HIGH RISK
+          </div>
+
+          <!-- Simulation Button -->
+          <button id="btnTriggerSim" class="cyber-btn px-3.5 py-2 text-xs font-black rounded-xl text-white shadow-lg transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300 fill-amber-300"></i> <span>Simulate AI Shift</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Top KPI Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        
+        <!-- KPI 1 -->
+        <div class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Water Trend</span>
+              <div class="p-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                <i data-lucide="trending-down" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div id="trendValue" class="text-base sm:text-xl font-black text-rose-400 flex items-center gap-1 transition-all glow-text-rose">
+              ↓ Declining
+            </div>
+            <p id="trendDelta" class="text-[10px] sm:text-xs text-slate-400 mt-0.5">-14% baseline variance</p>
+          </div>
+          <div class="mt-2.5 cyber-progress-track">
+            <div class="cyber-progress-fill bg-rose-500 text-rose-400" style="width: 28%;"></div>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Forecast (7D)</span>
+              <div class="p-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div id="forecast7dValue" class="text-base sm:text-xl font-black text-amber-400 truncate transition-all">
+              Decreasing
+            </div>
+            <p id="forecast7dNote" class="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">Dry spell ahead</p>
+          </div>
+          <div class="mt-2.5 cyber-progress-track">
+            <div class="cyber-progress-fill bg-amber-400 text-amber-300" style="width: 44%;"></div>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Reservoir Storage</span>
+              <div class="p-1 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                <i data-lucide="waves" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div id="storageValue" class="text-base sm:text-xl font-black text-white transition-all glow-text-cyan">
+              34.2%
+            </div>
+            <p id="storageNote" class="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">34% of Full Cap</p>
+          </div>
+          <div class="mt-2.5 cyber-progress-track">
+            <div id="storageProgressBar" class="cyber-progress-fill bg-sky-400 text-sky-300" style="width: 34.2%;"></div>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Groundwater Depth</span>
+              <div class="p-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <i data-lucide="arrow-down-to-line" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div id="groundwaterValue" class="text-base sm:text-xl font-black text-white transition-all">
+              38.5 m
+            </div>
+            <p id="groundwaterNote" class="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">Depleting (-1.2m)</p>
+          </div>
+          <div class="mt-2.5 cyber-progress-track">
+            <div class="cyber-progress-fill bg-indigo-400 text-indigo-300" style="width: 62%;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Main Visualisation Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        
+        <!-- Left: 4-Day Forecast Bar Chart -->
+        <div class="lg:col-span-7 glass-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-black text-xs sm:text-sm uppercase tracking-wider text-white flex items-center gap-1.5">
+                  <i data-lucide="bar-chart-3" class="w-4 h-4 text-sky-400"></i> Water Availability — Next 4 Days
+                </h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Machine learning live predictive model projection</p>
+              </div>
+              <span class="text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-500/40 shadow-xs">
+                AI ML Output
+              </span>
+            </div>
+
+            <div class="relative h-56 sm:h-64 w-full">
+              <canvas id="forecastChart"></canvas>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-1.5 text-[10px] sm:text-xs text-slate-400">
+            <span class="font-bold text-slate-300">Risk Thresholds:</span>
+            <div class="flex items-center gap-2 sm:gap-3">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> >50% Low</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span> 40-50% Mod</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400 shadow-sm shadow-orange-400"></span> 30-40% High</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400 shadow-sm shadow-rose-400"></span> &lt;30% Crit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Risk Factor Donut -->
+        <div class="lg:col-span-5 glass-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
+              <h3 class="font-black text-xs sm:text-sm uppercase tracking-wider text-white flex items-center gap-1.5">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-sky-400"></i> Risk Factor Contribution
+              </h3>
+              <span class="text-[10px] text-slate-400 font-bold">Feature Weights</span>
+            </div>
+            
+            <div class="relative h-44 sm:h-48 w-full">
+              <canvas id="factorDonut"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-slate-800 text-center">
+            <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 shadow-inner">
+              <span class="text-[10px] text-slate-400 block font-semibold">Daily Consumption</span>
+              <span id="consumptionValue" class="text-xs sm:text-sm font-black text-white">935 MLD</span>
+            </div>
+            <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 shadow-inner">
+              <span class="text-[10px] text-slate-400 block font-semibold">Rainfall Anomaly</span>
+              <span id="rainfallAnomalyValue" class="text-xs sm:text-sm font-black text-rose-400">-42% vs Norm</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Proactive Early Warning Alert Banner -->
+      <div id="alertBannerContainer"></div>
+
+    </div>
+
+    <!-- ================= TAB 2: GEOGRAPHIC RISK MAP ================= -->
+    <div id="map-view-tab" class="tab-panel hidden space-y-3 sm:space-y-4">
+      <div class="glass-card p-3.5 sm:p-5 rounded-2xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5 glow-text-cyan">
+              <i data-lucide="map-pin" class="w-4 h-4 text-sky-400"></i> Regional Risk Map View (India)
+            </h3>
+            <p class="text-[11px] text-slate-400">Click any radar node on the dark satellite map to inspect telemetry and switch live zone.</p>
+          </div>
+          <div class="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-300">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Low</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span> Mod</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-sm shadow-orange-400"></span> High</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 shadow-sm shadow-rose-400"></span> Crit</span>
+          </div>
+        </div>
+
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 3: INGESTION & AI TRENDS ================= -->
+    <div id="analytics-tab" class="tab-panel hidden space-y-4 sm:space-y-6">
+      
+      <div class="glass-card p-3.5 sm:p-5 rounded-2xl">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h3 class="text-sm sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5 glow-text-cyan">
+              <i data-lucide="activity" class="w-4 h-4 text-sky-400"></i> 5-Week Multi-Signal Ingestion & Trend Analysis
+            </h3>
+            <p class="text-[11px] text-slate-400">Rainfall Inflow (mm) vs Consumption (MLD) vs Storage Capacity (%)</p>
+          </div>
+        </div>
+
+        <div class="relative h-64 sm:h-80 w-full">
+          <canvas id="historicalChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card p-3.5 sm:p-5 rounded-2xl">
+        <h3 class="text-xs sm:text-base font-black text-white mb-2.5 flex items-center gap-1.5">
+          <i data-lucide="sliders" class="w-4 h-4 text-sky-400"></i> Feature Engineering & Anomaly Signals
+        </h3>
+        <div id="factorsListContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5"></div>
+      </div>
+
+    </div>
+
+    <!-- ================= TAB 4: KANIKA'S RESEARCH & DECISION ENGINE ================= -->
+    <div id="research-hub-tab" class="tab-panel hidden space-y-4 sm:space-y-6">
+      
+      <!-- Top Overview Card -->
+      <div class="glass-card p-5 rounded-2xl border border-purple-500/30">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-500/40">
+                Lead: Kanika (Research & System Design)
+              </span>
+              <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/40">
+                NITI Aayog & MCDA Framework
+              </span>
+            </div>
+            <h3 class="text-xl font-black text-white tracking-tight mt-1.5 glow-text-cyan">
+              Multi-Criteria Decision Analysis (MCDA) & Policy Intelligence Hub
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Mathematical modeling of water stress indices and government policy benchmarks for municipal proactive action.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="p-3 bg-purple-950/60 border border-purple-500/40 rounded-xl text-center">
+              <span class="text-[10px] text-purple-300 font-bold block">CWMI Benchmark Score</span>
+              <strong class="text-lg font-black text-white">68.4 / 100</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live MCDA Weight Calculator (Interactive Simulator for Judges) -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-800">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h4 class="text-base font-black text-white flex items-center gap-2">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-purple-400"></i>
+              Interactive MCDA Risk Weight Simulator
+            </h4>
+            <p class="text-xs text-slate-400">Adjust the environmental factor weights below to dynamically compute the composite water stress index.</p>
+          </div>
+          <span class="text-xs font-bold text-sky-400 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800">
+            Formula: S = Σ (wᵢ · xᵢ)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <!-- Slider 1: Rainfall Deficit -->
+          <div class="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5">
+              <label for="sliderRainfall" class="text-xs font-bold text-slate-300">1. Rainfall Deficit Weight</label>
+              <span id="labelRainfallWeight" class="text-xs font-black text-rose-400">40%</span>
+            </div>
+            <input type="range" id="sliderRainfall" min="10" max="60" value="40" class="w-full accent-sky-400 cursor-pointer">
+            <span class="text-[10px] text-slate-500 block mt-1">IMD Meteorological Drought Signal</span>
+          </div>
+
+          <!-- Slider 2: Reservoir Storage -->
+          <div class="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5">
+              <label for="sliderStorage" class="text-xs font-bold text-slate-300">2. Reservoir Storage Depletion</label>
+              <span id="labelStorageWeight" class="text-xs font-black text-amber-400">35%</span>
+            </div>
+            <input type="range" id="sliderStorage" min="10" max="60" value="35" class="w-full accent-sky-400 cursor-pointer">
+            <span class="text-[10px] text-slate-500 block mt-1">CWC Surface Storage Index</span>
+          </div>
+
+          <!-- Slider 3: Urban Consumption -->
+          <div class="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5">
+              <label for="sliderConsumption" class="text-xs font-bold text-slate-300">3. Urban Demand Surge</label>
+              <span id="labelConsumptionWeight" class="text-xs font-black text-sky-400">25%</span>
+            </div>
+            <input type="range" id="sliderConsumption" min="10" max="50" value="25" class="w-full accent-sky-400 cursor-pointer">
+            <span class="text-[10px] text-slate-500 block mt-1">Municipal Telemetry Ingestion</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Computed Score Box -->
+        <div class="p-4 rounded-xl bg-slate-900/95 border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-purple-950 border border-purple-500/40 flex items-center justify-center text-purple-300 font-black text-lg shadow-md">
+              <span id="mcdaScoreDisplay">74.5</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Computed Stress Index</span>
+              <strong id="mcdaRiskClassification" class="text-base font-black text-orange-400">HIGH VULNERABILITY ZONE</strong>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="resetMCDASimulator()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
+              Reset Weights
+            </button>
+            <div class="px-3 py-1.5 rounded-lg bg-emerald-950 text-emerald-300 text-xs font-bold border border-emerald-500/30 flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Model Validated
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain References & Government Telemetry Connectors -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Government Data Connectors -->
+        <div class="glass-card p-5 rounded-2xl">
+          <h4 class="text-sm font-black text-white mb-3 flex items-center gap-2">
+            <i data-lucide="database" class="w-4 h-4 text-sky-400"></i>
+            Authoritative Government Telemetry Feeds
+          </h4>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <strong class="text-white block font-bold">Central Ground Water Board (CGWB)</strong>
+                <span class="text-slate-400 text-[11px]">Borewell depth sensors & aquifer recharge rates.</span>
+              </div>
+              <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">Connected</span>
+            </div>
+
+            <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <strong class="text-white block font-bold">India Meteorological Dept (IMD) API</strong>
+                <span class="text-slate-400 text-[11px]">Daily rainfall telemetry & Doppler radar precipitation.</span>
+              </div>
+              <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">Connected</span>
+            </div>
+
+            <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <strong class="text-white block font-bold">NWIC / India-WRIS</strong>
+                <span class="text-slate-400 text-[11px]">Major dam reservoir capacities & river basin levels.</span>
+              </div>
+              <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">Connected</span>
+            </div>
+
+            <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <strong class="text-white block font-bold">Jal Jeevan Mission Dashboard</strong>
+                <span class="text-slate-400 text-[11px]">Rural tap water functional metrics & supply consistency.</span>
+              </div>
+              <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">Connected</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Municipal Action Playbook (SOP) -->
+        <div class="glass-card p-5 rounded-2xl">
+          <h4 class="text-sm font-black text-white mb-3 flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-4 h-4 text-amber-400"></i>
+            Proactive Municipal Mitigation SOP Playbook
+          </h4>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-emerald-950/40 rounded-xl border border-emerald-800/50">
+              <div class="flex justify-between items-center mb-0.5">
+                <strong class="text-emerald-300 font-bold">Stage 1: Low Risk (>50% Availability)</strong>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-900 text-emerald-200">Routine</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">Standard water distribution; continuous IoT telemetry health check.</p>
+            </div>
+
+            <div class="p-2.5 bg-amber-950/40 rounded-xl border border-amber-800/50">
+              <div class="flex justify-between items-center mb-0.5">
+                <strong class="text-amber-300 font-bold">Stage 2: Moderate Risk (40-50%)</strong>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-900 text-amber-200">Advisory</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">Issue public conservation alerts; audit high-consumption commercial pipelines.</p>
+            </div>
+
+            <div class="p-2.5 bg-orange-950/40 rounded-xl border border-orange-800/50">
+              <div class="flex justify-between items-center mb-0.5">
+                <strong class="text-orange-300 font-bold">Stage 3: High Risk (30-40%)</strong>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-orange-900 text-orange-200">Mitigation</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">Divert canal reserves; schedule 15% non-essential supply rationing.</p>
+            </div>
+
+            <div class="p-2.5 bg-rose-950/40 rounded-xl border border-rose-800/50">
+              <div class="flex justify-between items-center mb-0.5">
+                <strong class="text-rose-300 font-bold">Stage 4: Critical Risk (&lt;30%)</strong>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-900 text-rose-200">Emergency</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">Trigger emergency water grid interconnects & deploy disaster response tankers.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= TAB 5: DATABASE & SQL HUB (AKANSHA) ================= -->
+    <div id="database-hub-tab" class="tab-panel hidden space-y-4 sm:space-y-6">
+
+      <!-- Header & Database Node Info -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 glass-card p-4 sm:p-5 rounded-2xl border border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight glow-text-cyan flex items-center gap-2">
+              <i data-lucide="database" class="w-6 h-6 text-emerald-400"></i>
+              Akansha's Data Storage & SQL Architecture (Layer 2)
+            </h2>
+            <span class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-black uppercase bg-emerald-950 text-emerald-400 border border-emerald-500/40 hidden sm:inline-flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live Ingestion Active
+            </span>
+          </div>
+          <p class="text-[11px] sm:text-xs text-slate-400 mt-1">
+            SQLite 3.45 WAL Telemetry Warehouse · 3NF Relational Schema · Sub-millisecond Query Latency for AI Models & Visualisations
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 font-mono text-[11px] flex items-center gap-1.5">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400"></i> SQLite 3.45 (WAL)
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i> Latency: ~0.84ms
+          </span>
+          <button id="btnExportSqlDump" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold text-[11px] border border-sky-500/30 transition flex items-center gap-1 cursor-pointer">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Schema DDL
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Database Health & Telemetry Metrics Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        
+        <!-- Metric 1 -->
+        <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Total Telemetry Rows</span>
+              <div class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <i data-lucide="database" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div id="dbRowCountDisplay" class="text-base sm:text-xl font-black text-emerald-400 font-mono glow-text-emerald">
+              14,480 Rows
+            </div>
+            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Auto-partitioned time-series</p>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-500 font-mono">
+            Table: <code>sensor_telemetry</code>
+          </div>
+        </div>
+
+        <!-- Metric 2 -->
+        <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Query Speed (Indexed)</span>
+              <div class="p-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div class="text-base sm:text-xl font-black text-amber-300 font-mono">
+              0.84 ms
+            </div>
+            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">B-Tree primary key lookup</p>
+          </div>
+          <div class="mt-2 text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+            <i data-lucide="check" class="w-3 h-3"></i> Sub-millisecond execution
+          </div>
+        </div>
+
+        <!-- Metric 3 -->
+        <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Relational Normalization</span>
+              <div class="p-1 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div class="text-base sm:text-xl font-black text-sky-300 font-mono">
+              3NF Compliant
+            </div>
+            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Foreign Key Integrity ON</p>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-500 font-mono">
+            4 Relational Tables
+          </div>
+        </div>
+
+        <!-- Metric 4 -->
+        <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Data Pipeline Handshake</span>
+              <div class="p-1 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                <i data-lucide="git-commit" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+            <div class="text-base sm:text-xl font-black text-purple-300 font-mono">
+              Layer 1 ➔ 2 ➔ 4 ➔ 6
+            </div>
+            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">IMD / CGWB ➔ SQL ➔ AI ➔ UI</p>
+          </div>
+          <div class="mt-2 text-[10px] text-purple-400 font-bold flex items-center gap-1">
+            <i data-lucide="check-circle-2" class="w-3 h-3"></i> Seamless Handshake
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Interactive SQL Query Terminal & Simulator -->
+      <div class="glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="terminal" class="w-5 h-5 text-sky-400"></i>
+              Interactive SQL Query Runner (Live SQLite Simulator)
+            </h3>
+            <p class="text-[11px] sm:text-xs text-slate-400">
+              Execute live relational queries against telemetry records. Click preset query chips or type custom SQL below.
+            </p>
+          </div>
+          <span id="queryExecBadge" class="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-emerald-400 shrink-0">
+            ⚡ Ready · Database Online
+          </span>
+        </div>
+
+        <!-- Preset Query Chips -->
+        <div class="flex flex-wrap gap-2 mb-3">
+          <button onclick="loadPresetQuery('query_critical')" class="preset-chip text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-sky-500 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i> 1. Critical Water Deficits
+          </button>
+          <button onclick="loadPresetQuery('query_groundwater')" class="preset-chip text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-sky-500 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i> 2. Deepest Aquifer Depletion
+          </button>
+          <button onclick="loadPresetQuery('query_forecast')" class="preset-chip text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-sky-500 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i> 3. Day-4 AI Predictions
+          </button>
+          <button onclick="loadPresetQuery('query_state_agg')" class="preset-chip text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-sky-500 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-sky-400"></i> 4. State Aggregation & Averages
+          </button>
+        </div>
+
+        <!-- SQL Editor Input Box -->
+        <div class="relative bg-slate-950 rounded-xl border border-slate-700/80 p-3 sm:p-4 font-mono text-xs sm:text-sm text-slate-200 mb-3 shadow-inner">
+          <div class="flex items-center justify-between text-[11px] text-slate-500 mb-2 border-b border-slate-800 pb-1.5">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block"></span>
+              <span class="ml-2 text-slate-400 font-sans font-bold">akansha_water_intelligence.sqlite</span>
+            </span>
+            <span id="activePresetDesc" class="text-sky-400 text-[10px] font-sans truncate max-w-[200px] sm:max-w-none">
+              Filtering districts with high/critical risk
+            </span>
+          </div>
+
+          <textarea 
+            id="sqlInputEditor" 
+            rows="4" 
+            class="w-full bg-transparent text-sky-300 font-mono text-xs sm:text-sm focus:outline-none resize-none leading-relaxed"
+            placeholder="SELECT * FROM sensor_telemetry..."
+          ></textarea>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-800">
+            <div class="text-[10px] sm:text-[11px] text-slate-400 font-sans">
+              Press <strong>Run SQL Query</strong> to fetch live dataset records
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnResetQuery" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer">
+                Reset
+              </button>
+              <button id="btnRunQuery" class="cyber-btn text-white text-xs font-black px-4 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95">
+                <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i> Run SQL Query
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Query Execution Result Table -->
+        <div class="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
+          <div class="bg-slate-900/90 px-3.5 py-2 border-b border-slate-800 flex items-center justify-between text-xs font-bold text-slate-300">
+            <span class="flex items-center gap-2">
+              <i data-lucide="table" class="w-4 h-4 text-emerald-400"></i> Query Output Terminal
+            </span>
+            <span id="queryResultMeta" class="text-[10px] font-mono text-emerald-400">
+              4 records retrieved in 0.82 ms
+            </span>
+          </div>
+          <div id="queryResultContainer" class="overflow-x-auto max-h-64 no-scrollbar p-0">
+            <!-- Dynamic table generated by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Relational Data Explorer (Full District Ingestion Table) -->
+      <div class="glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="server" class="w-5 h-5 text-emerald-400"></i>
+              Live Telemetry Relational Explorer (12 Monitored Districts)
+            </h3>
+            <p class="text-[11px] sm:text-xs text-slate-400">
+              All 12 Indian districts stream telemetry into Akansha's SQLite relational database schema.
+            </p>
+          </div>
+
+          <!-- Search & Filter Bar -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Search District Input -->
+            <div class="relative">
+              <input 
+                type="text" 
+                id="dbSearchInput" 
+                placeholder="Search district..." 
+                class="bg-slate-950 text-xs text-white placeholder-slate-500 rounded-xl px-3 py-1.5 pl-8 border border-slate-700 focus:border-sky-400 focus:outline-none w-36 sm:w-44"
+              />
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+            </div>
+
+            <!-- Risk Status Filter -->
+            <select id="dbRiskFilter" class="bg-slate-950 text-xs font-bold text-sky-400 py-1.5 px-2.5 rounded-xl border border-slate-700 focus:outline-none cursor-pointer">
+              <option value="ALL">All Risk Statuses</option>
+              <option value="CRITICAL">Critical Only</option>
+              <option value="HIGH">High Risk Only</option>
+              <option value="MODERATE">Moderate Only</option>
+              <option value="LOW">Low Risk Only</option>
+            </select>
+
+            <!-- Export CSV Button -->
+            <button id="btnExportCsv" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-sky-400 hover:text-white border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Full Dynamic SQL Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">region_id</th>
+                <th class="py-2.5 px-3">district_name</th>
+                <th class="py-2.5 px-3">state</th>
+                <th class="py-2.5 px-3">storage_pct</th>
+                <th class="py-2.5 px-3">gw_depth</th>
+                <th class="py-2.5 px-3">consumption</th>
+                <th class="py-2.5 px-3">rainfall_anom</th>
+                <th class="py-2.5 px-3">risk_status</th>
+                <th class="py-2.5 px-3 text-right">action</th>
+              </tr>
+            </thead>
+            <tbody id="dbLiveTableBody" class="divide-y divide-slate-800/80 font-mono text-slate-300">
+              <!-- Dynamically populated rows from state.data -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-slate-500 mt-3">
+          <span id="dbTableSummaryText">Showing 12 active district telemetry nodes</span>
+          <span class="text-emerald-400 flex items-center gap-1 font-bold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Synchronized with Live Telemetry Stream
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Relational Entity-Relationship (ER) Schema Visualizer -->
+      <div class="glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
+        <h3 class="text-base sm:text-lg font-black text-white mb-1 flex items-center gap-2">
+          <i data-lucide="git-fork" class="w-5 h-5 text-purple-400"></i>
+          Akansha's Relational Database Schema Model (ER Architecture)
+        </h3>
+        <p class="text-[11px] sm:text-xs text-slate-400 mb-4">
+          Structured 3NF tables ensuring zero redundancy, high-speed joins, and seamless ingestion from IMD/CGWB APIs to Deep's ML pipeline.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
+          
+          <!-- Schema Card 1: regions -->
+          <div class="bg-slate-950 rounded-xl border border-sky-500/30 p-3.5 flex flex-col justify-between shadow-md">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                <span class="font-black text-sky-400 font-mono flex items-center gap-1">
+                  <i data-lucide="table" class="w-3.5 h-3.5"></i> regions
+                </span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">Master</span>
+              </div>
+              <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+                <li class="flex items-center justify-between">
+                  <span class="text-amber-300 font-bold">🔑 region_id</span>
+                  <span class="text-slate-500">TEXT (PK)</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>region_name</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>state</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>latitude / lng</span>
+                  <span class="text-slate-500">REAL</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>zone</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+              </ul>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-800/80">
+              Primary lookup table for all 12 monitored districts.
+            </p>
+          </div>
+
+          <!-- Schema Card 2: sensor_telemetry -->
+          <div class="bg-slate-950 rounded-xl border border-emerald-500/30 p-3.5 flex flex-col justify-between shadow-md">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                <span class="font-black text-emerald-400 font-mono flex items-center gap-1">
+                  <i data-lucide="activity" class="w-3.5 h-3.5"></i> sensor_telemetry
+                </span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">Time-Series</span>
+              </div>
+              <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+                <li class="flex items-center justify-between">
+                  <span class="text-amber-300 font-bold">🔑 telemetry_id</span>
+                  <span class="text-slate-500">INT (PK)</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span class="text-sky-300 font-bold">🔗 region_id</span>
+                  <span class="text-slate-500">TEXT (FK)</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>storage_capacity_pct</span>
+                  <span class="text-slate-500">REAL</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>groundwater_depth_m</span>
+                  <span class="text-slate-500">REAL</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>daily_consumption</span>
+                  <span class="text-slate-500">INT</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>risk_status</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+              </ul>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-800/80">
+              Receives live IoT telemetry and hydrograph updates.
+            </p>
+          </div>
+
+          <!-- Schema Card 3: forecast_4days -->
+          <div class="bg-slate-950 rounded-xl border border-purple-500/30 p-3.5 flex flex-col justify-between shadow-md">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                <span class="font-black text-purple-400 font-mono flex items-center gap-1">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> forecast_4days
+                </span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800">AI ML Output</span>
+              </div>
+              <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+                <li class="flex items-center justify-between">
+                  <span class="text-amber-300 font-bold">🔑 forecast_id</span>
+                  <span class="text-slate-500">INT (PK)</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span class="text-sky-300 font-bold">🔗 region_id</span>
+                  <span class="text-slate-500">TEXT (FK)</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>day_name</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>predicted_availability</span>
+                  <span class="text-slate-500">REAL</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>badge_label</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+              </ul>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-800/80">
+              Feeds Chart.js forecast bars on Saurav's frontend.
+            </p>
+          </div>
+
+          <!-- Schema Card 4: mcda_weights -->
+          <div class="bg-slate-950 rounded-xl border border-amber-500/30 p-3.5 flex flex-col justify-between shadow-md">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                <span class="font-black text-amber-400 font-mono flex items-center gap-1">
+                  <i data-lucide="sliders" class="w-3.5 h-3.5"></i> mcda_weights
+                </span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">Parameters</span>
+              </div>
+              <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+                <li class="flex items-center justify-between">
+                  <span class="text-amber-300 font-bold">🔑 weight_id</span>
+                  <span class="text-slate-500">INT (PK)</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>parameter_name</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>weight_percentage</span>
+                  <span class="text-slate-500">INT</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>active_profile</span>
+                  <span class="text-slate-500">TEXT</span>
+                </li>
+              </ul>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-800/80">
+              Stores Kanika's research multi-criteria risk formula weights.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Akansha's Pitch & Judge Q&A Card -->
+      <div class="glass-card p-4 sm:p-6 rounded-2xl border-l-4 border-emerald-400">
+        <div class="flex items-center gap-2 text-emerald-400 font-black text-xs sm:text-sm uppercase tracking-wider mb-2">
+          <i data-lucide="mic" class="w-4 h-4"></i> Akansha's 30-Second SIH Judge Pitch (Database & Storage Lead)
+        </div>
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed italic mb-4">
+          "Hello Judges! I designed and built the <strong>Database Architecture and Data Management Layer (Layer 2)</strong>. I developed the 3NF relational SQLite schema to ingest, index, and organize live telemetry across 12 Indian districts. My architecture features sub-millisecond B-Tree queries, foreign-key data integrity, and time-series partitioning. This ensures that Bhavishya's data processing, Deep's AI forecasting pipeline, and Saurav's live frontend visualisations receive reliable, lightning-fast data streams without any bottleneck."
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <strong class="text-emerald-300 font-bold block mb-0.5">Judge Q: "Why SQLite for Hackathon MVP & how will it scale?"</strong>
+            <p class="text-slate-400 text-[11px]">
+              "SQLite in WAL mode provides zero-configuration, lightning speed, and serverless reliability for local demo nodes. Our schema strictly follows ANSI-SQL standards, allowing a 1-click migration to PostgreSQL or TimescaleDB for multi-state production deployments."
+            </p>
+          </div>
+          <div>
+            <strong class="text-sky-300 font-bold block mb-0.5">Judge Q: "How does your DB handle missing sensor packets?"</strong>
+            <p class="text-slate-400 text-[11px]">
+              "We implement database-level check constraints and fallback triggers that route null readings to Layer 3 (Bhavishya's Python pipeline) for KNN interpolation before AI scoring."
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= TAB 6: ARCHITECTURE & TEAM ================= -->
+    <div id="architecture-tab" class="tab-panel hidden space-y-4 sm:space-y-6">
+      
+      <div class="glass-card p-4 sm:p-6 rounded-2xl">
+        <h3 class="text-base sm:text-xl font-black text-white tracking-tight mb-1 glow-text-cyan">Platform 6-Layer Architecture</h3>
+        <p class="text-[11px] text-slate-400 mb-4 sm:mb-6">How data flows from collection to Saurav's frontend dashboard.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+          <div class="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-white">
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-500/40">Layer 1</span>
+            <h4 class="font-bold text-xs sm:text-sm mt-1.5 text-white">Input Layer</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Weather APIs, IMD rainfall feeds, reservoir datasets.</p>
+          </div>
+          <div class="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-white">
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-500/40">Layer 2</span>
+            <h4 class="font-bold text-xs sm:text-sm mt-1.5 text-white">Data Storage (Akansha)</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">SQLite / SQL schema, telemetry records, regional metadata.</p>
+          </div>
+          <div class="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-white">
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-500/40">Layer 3</span>
+            <h4 class="font-bold text-xs sm:text-sm mt-1.5 text-white">Processing (Bhavishya)</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Python, Pandas, NumPy cleaning, missing value interpolation.</p>
+          </div>
+          <div class="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-white">
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-500/40">Layer 4</span>
+            <h4 class="font-bold text-xs sm:text-sm mt-1.5 text-white">AI / ML Model (Deep)</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Random Forest / Regression for risk & shortage forecasting.</p>
+          </div>
+          <div class="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-white">
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-500/40">Layer 5</span>
+            <h4 class="font-bold text-xs sm:text-sm mt-1.5 text-white">Application API</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Flask / FastAPI endpoints dispatching JSON payloads.</p>
+          </div>
+          <div class="p-3.5 bg-slate-900/90 text-white border-2 border-sky-400 rounded-xl shadow-lg shadow-sky-500/30">
+            <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-sky-400 text-slate-950">Layer 6 · Saurav</span>
+            <h4 class="font-bold text-xs sm:text-sm mt-1.5 text-sky-300">Presentation Dashboard</h4>
+            <p class="text-[11px] text-slate-300 mt-0.5">HTML, CSS, JavaScript, Chart.js, Leaflet interactive visualisations.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 sm:p-6 rounded-2xl">
+        <h3 class="text-sm sm:text-lg font-black text-white tracking-tight mb-3">Team Responsibilities (SIH 2026)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 text-xs">
+          <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800">
+            <strong class="text-white font-bold block">Deep</strong>
+            <span class="text-slate-400 text-[11px]">Lead & AI/ML</span>
+          </div>
+          <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800">
+            <strong class="text-white font-bold block">Bhavishya</strong>
+            <span class="text-slate-400 text-[11px]">Python & Data</span>
+          </div>
+          <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800">
+            <strong class="text-white font-bold block">Akansha</strong>
+            <span class="text-slate-400 text-[11px]">Database (SQL)</span>
+          </div>
+          <div class="p-3 bg-purple-950/60 border border-purple-500/60 rounded-xl shadow-md shadow-purple-500/20">
+            <strong class="text-purple-300 font-bold block">Kanika</strong>
+            <span class="text-purple-400 text-[11px]">Research & System Design</span>
+          </div>
+          <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800">
+            <strong class="text-white font-bold block">Hasim</strong>
+            <span class="text-slate-400 text-[11px]">Testing & Support</span>
+          </div>
+          <div class="p-3 bg-sky-950/70 border border-sky-500/70 rounded-xl shadow-md shadow-sky-500/20">
+            <strong class="text-sky-300 font-bold block">Saurav (You)</strong>
+            <span class="text-sky-400 text-[11px]">Frontend & Charts</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-slate-950 border-t border-slate-900 py-3 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-1 text-[11px] text-slate-500 text-center sm:text-left">
+      <div class="flex items-center justify-center gap-1.5">
+        <i data-lucide="droplets" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span><strong>Water Intelligence</strong> — SIH 2026 Cyber Edition</span>
+      </div>
+      <div>
+        <span>Akansha SQL DB & Kanika Research Engine Integrated (PIN: 2026)</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+/**
+ * Water Intelligence - Mock Dataset & Region Telemetry
+ * Prepared for SIH 2026 - Saurav (Frontend & Visualisation)
+ * 
+ * This file provides high-fidelity sample data for multiple Indian regions.
+ * If the backend API is offline during the hackathon demo, the dashboard
+ * seamlessly falls back to these records.
+ */
+
+const REGION_DATA = {
+  "delhi": {
+    name: "Delhi NCR",
+    state: "Delhi",
+    lat: 28.6139,
+    lng: 77.2090,
+    status: "HIGH", // LOW | MODERATE | HIGH | CRITICAL
+    statusText: "High Shortage Risk",
+    waterTrend: { label: "Declining", change: "-14%", direction: "down" },
+    forecast7d: { label: "Decreasing", note: "Dry spell expected next 7 days", direction: "down" },
+    storageLevel: { value: 34, label: "34% of Full Capacity", status: "warning" },
+    groundwaterDepth: { value: "38.5 m", label: "Depleting (-1.2m YoY)", status: "danger" },
+    dailyConsumption: "935 MLD",
+    rainfallAnomaly: "-42% vs Normal",
+    
+    // 4-Day Forecast matching Slide 9 mockup
+    next4Days: [
+      { day: "Today", value: 58, color: "#10b981", badge: "Moderate" },
+      { day: "Day 2", value: 48, color: "#f59e0b", badge: "Stressed" },
+      { day: "Day 3", value: 38, color: "#f97316", badge: "High Risk" },
+      { day: "Day 4", value: 28, color: "#ef4444", badge: "Critical" }
+    ],
+
+    // Multi-week Historical Trends
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [45, 32, 18, 12, 5],        // in mm
+      consumption: [810, 840, 890, 920, 935], // in MLD
+      availability: [78, 68, 54, 42, 34]     // in % capacity
+    },
+
+    // Contributing Risk Factors
+    factors: [
+      { name: "Monsoon Deficit", weight: 45, trend: "down", desc: "42% below long-period average in Yamuna catchment" },
+      { name: "Urban Consumption Surge", weight: 30, trend: "up", desc: "Peak summer/humidity demand up by 15.4%" },
+      { name: "Upstream Inflow Reduction", weight: 25, trend: "down", desc: "Wazirabad barrage level down to 667.2 ft" }
+    ],
+
+    // Proactive Early Warning Alert
+    alert: {
+      active: true,
+      level: "HIGH",
+      title: "Water Shortage Risk Detected",
+      summary: "The selected region is showing a declining water availability trend. Reduced rainfall and increasing consumption are primary contributing factors.",
+      recommendations: [
+        "Enforce phased municipal supply rationing in outer district sectors (08:00 - 17:00).",
+        "Deploy mobile sensor telemetry to detect secondary distribution leakage in grid 4.",
+        "Issue proactive conservation advisory to bulk commercial consumers.",
+        "Prepare backup water tank logistics for high-density residential blocks."
+      ]
+    }
+  },
+
+  "bundelkhand": {
+    name: "Bundelkhand (Jhansi Zone)",
+    state: "Uttar Pradesh / MP",
+    lat: 25.4484,
+    lng: 78.5685,
+    status: "CRITICAL",
+    statusText: "Critical Drought Stress",
+    waterTrend: { label: "Severely Depleting", change: "-28%", direction: "down" },
+    forecast7d: { label: "Extreme Dry", note: "No precipitation expected", direction: "down" },
+    storageLevel: { value: 19, label: "19% Reservoir Level", status: "danger" },
+    groundwaterDepth: { value: "52.3 m", label: "Critical Over-Exploitation", status: "danger" },
+    dailyConsumption: "280 MLD",
+    rainfallAnomaly: "-58% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 32, color: "#f97316", badge: "High Risk" },
+      { day: "Day 2", value: 24, color: "#ef4444", badge: "Critical" },
+      { day: "Day 3", value: 18, color: "#b91c1c", badge: "Severe" },
+      { day: "Day 4", value: 12, color: "#7f1d1d", badge: "Emergency" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [12, 8, 4, 0, 0],
+      consumption: [240, 255, 270, 275, 280],
+      availability: [42, 35, 28, 22, 19]
+    },
+
+    factors: [
+      { name: "Consecutive Rain Failure", weight: 55, trend: "down", desc: "Catchment reservoirs receiving zero fresh runoff" },
+      { name: "Agricultural Tube-well Draw", weight: 30, trend: "up", desc: "Unregulated borewell extraction for kharif sowing" },
+      { name: "Soil Moisture Depletion", weight: 15, trend: "down", desc: "Topsoil aridity index exceeding critical threshold" }
+    ],
+
+    alert: {
+      active: true,
+      level: "CRITICAL",
+      title: "Emergency Water Scarcity Warning",
+      summary: "Critical reservoir and aquifer depletion detected. Immediate inter-agency mitigation required within 48 hours.",
+      recommendations: [
+        "Activate Emergency Water Supply Plan and prepare railway water tankers.",
+        "Restrict non-essential industrial water intake immediately.",
+        "Prioritize livestock and drinking water supply over secondary agricultural canals."
+      ]
+    }
+  },
+
+  "marathwada": {
+    name: "Marathwada (Aurangabad / Sambhajinagar)",
+    state: "Maharashtra",
+    lat: 19.8762,
+    lng: 75.3433,
+    status: "HIGH",
+    statusText: "High Water Stress",
+    waterTrend: { label: "Declining", change: "-18%", direction: "down" },
+    forecast7d: { label: "Deficit Trend", note: "Isolated light showers only", direction: "down" },
+    storageLevel: { value: 27, label: "27% Jayakwadi Dam Storage", status: "warning" },
+    groundwaterDepth: { value: "41.0 m", label: "Semi-Critical Zone", status: "danger" },
+    dailyConsumption: "410 MLD",
+    rainfallAnomaly: "-35% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 50, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 2", value: 41, color: "#f97316", badge: "Stressed" },
+      { day: "Day 3", value: 31, color: "#ef4444", badge: "High Risk" },
+      { day: "Day 4", value: 22, color: "#ef4444", badge: "Critical" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [30, 22, 14, 8, 4],
+      consumption: [380, 390, 400, 405, 410],
+      availability: [58, 49, 39, 31, 27]
+    },
+
+    factors: [
+      { name: "Deficit Monsoon Inflow", weight: 48, trend: "down", desc: "Godavari basin feeder streams underperforming" },
+      { name: "Sugarcane Belt Consumption", weight: 32, trend: "up", desc: "High water footprint crop irrigation demand" },
+      { name: "Evaporative Losses", weight: 20, trend: "up", desc: "High ambient temperature increasing surface loss" }
+    ],
+
+    alert: {
+      active: true,
+      level: "HIGH",
+      title: "Regional Shortage Prediction Flagged",
+      summary: "Jayakwadi dam active storage falling below 30-day buffer threshold under current consumption velocity.",
+      recommendations: [
+        "Shift canal supply to micro-irrigation schedules.",
+        "Enforce strict audit on urban municipal pipeline losses.",
+        "Coordinate with state water board for synchronized dam gate control."
+      ]
+    }
+  },
+
+  "jaipur": {
+    name: "Jaipur Metropolitan",
+    state: "Rajasthan",
+    lat: 26.9124,
+    lng: 75.7873,
+    status: "MODERATE",
+    statusText: "Moderate Water Stress",
+    waterTrend: { label: "Slowly Declining", change: "-6%", direction: "down" },
+    forecast7d: { label: "Scattered Rain", note: "Moderate monsoon surge expected", direction: "up" },
+    storageLevel: { value: 61, label: "61% Bisalpur Dam Level", status: "success" },
+    groundwaterDepth: { value: "32.0 m", label: "Over-exploited in suburban zones", status: "warning" },
+    dailyConsumption: "520 MLD",
+    rainfallAnomaly: "-12% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 68, color: "#10b981", badge: "Normal" },
+      { day: "Day 2", value: 64, color: "#10b981", badge: "Normal" },
+      { day: "Day 3", value: 59, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 4", value: 55, color: "#f59e0b", badge: "Moderate" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [60, 45, 30, 25, 35],
+      consumption: [500, 505, 515, 520, 520],
+      availability: [72, 69, 66, 63, 61]
+    },
+
+    factors: [
+      { name: "Bisalpur Reservoir Buffer", weight: 50, trend: "stable", desc: "Current storage provides 60-day urban buffer" },
+      { name: "Suburban Ground Water Draw", weight: 30, trend: "up", desc: "Heavy reliance on private tankers in outer wards" },
+      { name: "Monsoon Revival Outlook", weight: 20, trend: "up", desc: "Upcoming western disturbance may augment supply" }
+    ],
+
+    alert: {
+      active: false,
+      level: "MODERATE",
+      title: "Advisory: Monitor Outer Subdivisions",
+      summary: "Overall reservoir supply is stable, but groundwater drawdown in peripheral zones requires regulated extraction.",
+      recommendations: [
+        "Maintain normal urban distribution schedule while monitoring dam levels.",
+        "Expedite rainwater harvesting structure inspections in educational institutions."
+      ]
+    }
+  },
+
+  "bengaluru": {
+    name: "Bengaluru Urban Zone",
+    state: "Karnataka",
+    lat: 12.9716,
+    lng: 77.5946,
+    status: "HIGH",
+    statusText: "Borewell & Grid Stress",
+    waterTrend: { label: "Declining", change: "-12%", direction: "down" },
+    forecast7d: { label: "Moderate Showers", note: "Intermittent convective rainfall", direction: "up" },
+    storageLevel: { value: 44, label: "44% Cauvery Reservoir Share", status: "warning" },
+    groundwaterDepth: { value: "48.2 m", label: "Severe Borewell Depletion (IT Corridor)", status: "danger" },
+    dailyConsumption: "1450 MLD",
+    rainfallAnomaly: "-24% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 56, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 2", value: 51, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 3", value: 43, color: "#f97316", badge: "Stressed" },
+      { day: "Day 4", value: 36, color: "#ef4444", badge: "High Risk" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [42, 38, 25, 20, 28],
+      consumption: [1380, 1400, 1420, 1440, 1450],
+      availability: [65, 59, 52, 48, 44]
+    },
+
+    factors: [
+      { name: "IT Corridor Borewell Failure", weight: 42, trend: "down", desc: "Over 35% public borewells running dry in Mahadevapura" },
+      { name: "Cauvery Stage-V Inflow Lag", weight: 33, trend: "stable", desc: "Piped water feeder network undergoing balancing" },
+      { name: "Lake Rejuvenation Deficit", weight: 25, trend: "down", desc: "Urban runoff bypassed into stormwater drains" }
+    ],
+
+    alert: {
+      active: true,
+      level: "HIGH",
+      title: "Groundwater Stress & Piped Grid Imbalance",
+      summary: "Peripheral wards facing tanker dependency and rapid groundwater table drop despite stable Cauvery river inflows.",
+      recommendations: [
+        "Fix maximum rate caps on private water tankers in high-stress zones.",
+        "Mandate treated wastewater reuse for commercial tech parks and gardens.",
+        "Accelerate recharge well injection in dry lake beds."
+      ]
+    }
+  },
+
+  "chennai": {
+    name: "Chennai Coastal Region",
+    state: "Tamil Nadu",
+    lat: 13.0827,
+    lng: 80.2707,
+    status: "LOW",
+    statusText: "Normal / Low Risk",
+    waterTrend: { label: "Stable / Recovering", change: "+4%", direction: "up" },
+    forecast7d: { label: "Normal Inflow", note: "Northeast monsoon preparedness on track", direction: "up" },
+    storageLevel: { value: 76, label: "76% Combined Lake Storage", status: "success" },
+    groundwaterDepth: { value: "14.5 m", label: "Healthy Aquifer Level", status: "success" },
+    dailyConsumption: "860 MLD",
+    rainfallAnomaly: "+14% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 82, color: "#10b981", badge: "Abundant" },
+      { day: "Day 2", value: 80, color: "#10b981", badge: "Abundant" },
+      { day: "Day 3", value: 78, color: "#10b981", badge: "Good" },
+      { day: "Day 4", value: 75, color: "#10b981", badge: "Normal" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [35, 50, 65, 40, 55],
+      consumption: [840, 850, 855, 860, 860],
+      availability: [68, 70, 73, 75, 76]
+    },
+
+    factors: [
+      { name: "Major Reservoir Storage", weight: 60, trend: "up", desc: "Poondi, Chembarambakkam, Red Hills at healthy levels" },
+      { name: "Desalination Plant Output", weight: 25, trend: "stable", desc: "Minjur & Nemmeli plants running at 92% capacity" },
+      { name: "Rainwater Harvesting Recharge", weight: 15, trend: "up", desc: "Widespread rooftop RWH systems replenishing shallow wells" }
+    ],
+
+    alert: {
+      active: false,
+      level: "LOW",
+      title: "System Status: Normal Operations",
+      summary: "Current reservoir volumes and desalination outputs are sufficient to satisfy city demand for 120+ days.",
+      recommendations: [
+        "Continue routine distribution schedule.",
+        "Perform pre-monsoon desilting of supply channels and surplus weirs."
+      ]
+    }
+  },
+
+  "mumbai": {
+    name: "Mumbai Metropolitan (MMR)",
+    state: "Maharashtra",
+    lat: 19.0760,
+    lng: 72.8777,
+    status: "LOW",
+    statusText: "Normal / Healthy Reservoir Stock",
+    waterTrend: { label: "Stable Inflow", change: "+8%", direction: "up" },
+    forecast7d: { label: "Heavy Konkan Monsoon", note: "Continuous reservoir catchment replenishment", direction: "up" },
+    storageLevel: { value: 86, label: "86% 7-Lake Combined System", status: "success" },
+    groundwaterDepth: { value: "8.2 m", label: "Adequate Coastal Water Table", status: "success" },
+    dailyConsumption: "3850 MLD",
+    rainfallAnomaly: "+22% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 88, color: "#10b981", badge: "Abundant" },
+      { day: "Day 2", value: 86, color: "#10b981", badge: "Abundant" },
+      { day: "Day 3", value: 84, color: "#10b981", badge: "Good" },
+      { day: "Day 4", value: 81, color: "#10b981", badge: "Normal" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [110, 145, 95, 80, 120],
+      consumption: [3750, 3800, 3820, 3850, 3850],
+      availability: [74, 78, 82, 84, 86]
+    },
+
+    factors: [
+      { name: "Bhatsa & Upper Vaitarna Inflow", weight: 55, trend: "up", desc: "Catchment gates operating to balance flood cushion and storage" },
+      { name: "High Urban Pipeline Flow", weight: 28, trend: "stable", desc: "Hydraulic pressure maintained across South & Suburb grids" },
+      { name: "Monsoon Catchment Discharge", weight: 17, trend: "up", desc: "Tansa and Modak Sagar overflowing into spillways" }
+    ],
+
+    alert: {
+      active: false,
+      level: "LOW",
+      title: "Adequate Annual Water Buffer Stock",
+      summary: "Combined lake storage exceeds 1.25 million ML, securing drinking water supplies through next summer.",
+      recommendations: [
+        "Monitor automated sluice gates during intense convective downpours.",
+        "Maintain proactive pipeline ultrasonic leak detection in old island ward networks."
+      ]
+    }
+  },
+
+  "hyderabad": {
+    name: "Hyderabad Urban Agglomeration",
+    state: "Telangana",
+    lat: 17.3850,
+    lng: 78.4867,
+    status: "MODERATE",
+    statusText: "Moderate Supply Balancing",
+    waterTrend: { label: "Mild Deficit", change: "-5%", direction: "down" },
+    forecast7d: { label: "Scattered Rains", note: "Godavari Phase-1 pumping operational", direction: "stable" },
+    storageLevel: { value: 52, label: "52% Singur & Osmansagar Storage", status: "warning" },
+    groundwaterDepth: { value: "34.2 m", label: "Stress in Cyberabad Belts", status: "warning" },
+    dailyConsumption: "2150 MLD",
+    rainfallAnomaly: "-16% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 62, color: "#10b981", badge: "Normal" },
+      { day: "Day 2", value: 58, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 3", value: 52, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 4", value: 46, color: "#f97316", badge: "Stressed" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [45, 30, 20, 15, 22],
+      consumption: [2050, 2080, 2110, 2140, 2150],
+      availability: [64, 60, 56, 54, 52]
+    },
+
+    factors: [
+      { name: "Godavari Pumping Energy Costs", weight: 45, trend: "stable", desc: "Long-distance multi-stage lift pipeline running 24/7" },
+      { name: "IT Corridor Rapid Growth", weight: 35, trend: "up", desc: "High-density residential towers drawing deep borewells" },
+      { name: "Manjira Inflow Deficit", weight: 20, trend: "down", desc: "Upstream check-dams retaining tributary runoff" }
+    ],
+
+    alert: {
+      active: false,
+      level: "MODERATE",
+      title: "Advisory: Monitor Outer Ring Road Pressure",
+      summary: "Piped supply is steady via Godavari lift scheme, but groundwater levels in western IT corridors show localized depletion.",
+      recommendations: [
+        "Optimize dual piping and decentralized sewage treatment plants in gated communities.",
+        "Enforce staggered municipal pumping schedules across industrial estates."
+      ]
+    }
+  },
+
+  "kolkata": {
+    name: "Kolkata & KMDA Zone",
+    state: "West Bengal",
+    lat: 22.5726,
+    lng: 88.3639,
+    status: "LOW",
+    statusText: "Low Stress / Perennial Surface Inflow",
+    waterTrend: { label: "Stable Flow", change: "+2%", direction: "up" },
+    forecast7d: { label: "Gangetic Monsoon Rains", note: "Active monsoon trough over Delta", direction: "up" },
+    storageLevel: { value: 78, label: "78% Surface River Offtake Index", status: "success" },
+    groundwaterDepth: { value: "11.0 m", label: "High Water Table (Salinity Monitored)", status: "success" },
+    dailyConsumption: "1850 MLD",
+    rainfallAnomaly: "+8% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 80, color: "#10b981", badge: "Abundant" },
+      { day: "Day 2", value: 78, color: "#10b981", badge: "Good" },
+      { day: "Day 3", value: 76, color: "#10b981", badge: "Good" },
+      { day: "Day 4", value: 74, color: "#10b981", badge: "Normal" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [65, 80, 50, 70, 60],
+      consumption: [1800, 1820, 1840, 1850, 1850],
+      availability: [75, 76, 76, 77, 78]
+    },
+
+    factors: [
+      { name: "Hooghly River Perennial Discharge", weight: 65, trend: "up", desc: "Palta and Garden Reach WTPs operating at optimum raw intake" },
+      { name: "Salinity & Turbidity Monitoring", weight: 20, trend: "stable", desc: "Automated real-time chlorination and coagulant dosing" },
+      { name: "East Kolkata Wetlands Filter", weight: 15, trend: "stable", desc: "Natural biological sewage attenuation and ground recharge" }
+    ],
+
+    alert: {
+      active: false,
+      level: "LOW",
+      title: "Abundant Surface Water Availability",
+      summary: "Riverine raw water intake is abundant. Focus remains on water quality, filtration, and pipeline disinfection.",
+      recommendations: [
+        "Continuous automated monitoring of riverbed silt and turbidity.",
+        "Maintain pre-chlorination dosing during high-tide brackish water incursions."
+      ]
+    }
+  },
+
+  "ahmedabad": {
+    name: "Ahmedabad & Gandhinagar",
+    state: "Gujarat",
+    lat: 23.0225,
+    lng: 72.5714,
+    status: "MODERATE",
+    statusText: "Moderate Canal Dependent Zone",
+    waterTrend: { label: "Stable Inflow", change: "-3%", direction: "down" },
+    forecast7d: { label: "Isolated Showers", note: "Narmada main canal discharge steady", direction: "stable" },
+    storageLevel: { value: 64, label: "64% Sardar Sarovar Allocation", status: "success" },
+    groundwaterDepth: { value: "36.8 m", label: "Deep Alluvial Aquifer Zone", status: "warning" },
+    dailyConsumption: "1420 MLD",
+    rainfallAnomaly: "-10% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 70, color: "#10b981", badge: "Normal" },
+      { day: "Day 2", value: 65, color: "#10b981", badge: "Normal" },
+      { day: "Day 3", value: 58, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 4", value: 52, color: "#f59e0b", badge: "Moderate" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [50, 35, 25, 20, 18],
+      consumption: [1360, 1380, 1400, 1410, 1420],
+      availability: [72, 69, 67, 65, 64]
+    },
+
+    factors: [
+      { name: "Narmada Main Canal Supply", weight: 58, trend: "stable", desc: "Continuous bulk conveyance to Kotarpur & Jaspur WTPs" },
+      { name: "Sabarmati Riverfront Storage", weight: 24, trend: "stable", desc: "Barrage retention level maintained for city aesthetic & recharge" },
+      { name: "Industrial Estate Intake", weight: 18, trend: "up", desc: "Vatva & Naroda estates monitored for effluent recycling" }
+    ],
+
+    alert: {
+      active: false,
+      level: "MODERATE",
+      title: "Stable Supply Supported by Narmada Canal",
+      summary: "Canal allocations provide 90% of urban potable needs. Secondary borewell dependency reduced.",
+      recommendations: [
+        "Audit smart water meter telemetry in commercial and institutional zones.",
+        "Ensure lake interlinking channels are cleared for monsoon catchment inflow."
+      ]
+    }
+  },
+
+  "shimla": {
+    name: "Shimla & Solan Hill Tract",
+    state: "Himachal Pradesh",
+    lat: 31.1048,
+    lng: 77.1734,
+    status: "HIGH",
+    statusText: "High Mountain Spring Stress",
+    waterTrend: { label: "Plunging Spring Inflow", change: "-24%", direction: "down" },
+    forecast7d: { label: "Low Precipitation", note: "Hill catchment dry spell", direction: "down" },
+    storageLevel: { value: 28, label: "28% Giri & Gumma Offtake", status: "danger" },
+    groundwaterDepth: { value: "Mountain Spring Discharge: 18 LPM", label: "Spring Source Drying Up", status: "danger" },
+    dailyConsumption: "46 MLD",
+    rainfallAnomaly: "-48% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 44, color: "#f97316", badge: "Stressed" },
+      { day: "Day 2", value: 36, color: "#f97316", badge: "Stressed" },
+      { day: "Day 3", value: 26, color: "#ef4444", badge: "Critical" },
+      { day: "Day 4", value: 18, color: "#b91c1c", badge: "Emergency" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [25, 18, 10, 6, 2],
+      consumption: [42, 44, 45, 46, 46],
+      availability: [54, 46, 38, 32, 28]
+    },
+
+    factors: [
+      { name: "Hill Spring Discharge Failure", weight: 52, trend: "down", desc: "Gumma and Ashwini Khad natural spring yields down by 42%" },
+      { name: "Tourist Surge & Hotel Consumption", weight: 30, trend: "up", desc: "Peak weekend tourist occupancy straining hill storage tanks" },
+      { name: "Multi-Stage High-Head Pumping Lift", weight: 18, trend: "stable", desc: "High elevation lift prone to power fluctuations" }
+    ],
+
+    alert: {
+      active: true,
+      level: "HIGH",
+      title: "Hill Spring Shortage & Tourist Influx Warning",
+      summary: "Natural spring discharge is severely depressed. Rotational water rationing required across municipal wards.",
+      recommendations: [
+        "Enforce strict alternate-day municipal supply to domestic consumers.",
+        "Audit bulk water storage and pricing in luxury hill resorts and hotels.",
+        "Deploy mobile mountain spring telemetry sensors to locate secondary fissures."
+      ]
+    }
+  },
+
+  "pune": {
+    name: "Pune Metropolitan (PMC / PCMC)",
+    state: "Maharashtra",
+    lat: 18.5204,
+    lng: 73.8567,
+    status: "LOW",
+    statusText: "Normal / Abundant Dam Storage",
+    waterTrend: { label: "Rising Inflow", change: "+11%", direction: "up" },
+    forecast7d: { label: "Western Ghats Catchment Rain", note: "Continuous inflow into Khadakwasla complex", direction: "up" },
+    storageLevel: { value: 89, label: "89% Khadakwasla, Panshet & Varasgaon", status: "success" },
+    groundwaterDepth: { value: "12.4 m", label: "Recharged Deccan Basalt Aquifer", status: "success" },
+    dailyConsumption: "1650 MLD",
+    rainfallAnomaly: "+28% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 92, color: "#10b981", badge: "Abundant" },
+      { day: "Day 2", value: 90, color: "#10b981", badge: "Abundant" },
+      { day: "Day 3", value: 88, color: "#10b981", badge: "Abundant" },
+      { day: "Day 4", value: 85, color: "#10b981", badge: "Good" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [90, 120, 110, 85, 95],
+      consumption: [1600, 1620, 1630, 1650, 1650],
+      availability: [76, 80, 84, 87, 89]
+    },
+
+    factors: [
+      { name: "4-Dam Complex Overflow Inflow", weight: 62, trend: "up", desc: "Panshet, Varasgaon, Temghar & Khadakwasla near capacity" },
+      { name: "Canal Discharge to Daund Agriculture", weight: 22, trend: "up", desc: "Surplus water released for downstream kharif crops" },
+      { name: "Urban 24x7 Water Supply Balancing", weight: 16, trend: "stable", desc: "Piped network pressure equalization in progress" }
+    ],
+
+    alert: {
+      active: false,
+      level: "LOW",
+      title: "Optimal Dam Storage & Safe Buffer",
+      summary: "Dam levels ensure 100% water security for the upcoming 12 months for both urban and rural canal networks.",
+      recommendations: [
+        "Coordinate flood release protocols along Mutha riverbed during heavy spell.",
+        "Continue pre-monsoon desilting and water treatment plant maintenance."
+      ]
+    }
+  },
+
+  "lucknow": {
+    name: "Lucknow Smart City",
+    state: "Uttar Pradesh",
+    lat: 26.8467,
+    lng: 80.9462,
+    status: "MODERATE",
+    statusText: "Moderate River & Tube-Well Stress",
+    waterTrend: { label: "Slow Deficit", change: "-7%", direction: "down" },
+    forecast7d: { label: "Light Monsoonal Showers", note: "Gomti river discharge steady", direction: "stable" },
+    storageLevel: { value: 58, label: "58% Gomti River Discharge Index", status: "warning" },
+    groundwaterDepth: { value: "28.6 m", label: "Semi-Critical in Trans-Gomti", status: "warning" },
+    dailyConsumption: "760 MLD",
+    rainfallAnomaly: "-18% vs Normal",
+
+    next4Days: [
+      { day: "Today", value: 65, color: "#10b981", badge: "Normal" },
+      { day: "Day 2", value: 60, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 3", value: 54, color: "#f59e0b", badge: "Moderate" },
+      { day: "Day 4", value: 48, color: "#f97316", badge: "Stressed" }
+    ],
+
+    historical: {
+      labels: ["W1 (Aug 01)", "W2 (Aug 08)", "W3 (Aug 15)", "W4 (Aug 22)", "Current (Aug 29)"],
+      rainfall: [40, 32, 22, 18, 25],
+      consumption: [720, 735, 750, 755, 760],
+      availability: [68, 65, 62, 60, 58]
+    },
+
+    factors: [
+      { name: "Gomti River Low Inflow", weight: 46, trend: "down", desc: "Upstream barrages retaining flow during monsoon gaps" },
+      { name: "Deep Tube-Well Extraction", weight: 34, trend: "up", desc: "High municipal extraction in high-density old city sectors" },
+      { name: "Aishbagh WTP Intake Pressure", weight: 20, trend: "stable", desc: "Raw water pumps operating under regulated hydraulic control" }
+    ],
+
+    alert: {
+      active: false,
+      level: "MODERATE",
+      title: "Gomti Inflow & Tube-Well Monitoring",
+      summary: "River intake and municipal borewells are operating within safe baseline, but Trans-Gomti wards require extraction regulation.",
+      recommendations: [
+        "Audit commercial borewells and mandate rainwater harvesting pits.",
+        "Optimize aeration and filtration cycles at Aishbagh Water Treatment Plant."
+      ]
+    }
+  }
+};
+
+/**
+ * Akansha's Relational Database Schema & Query Presets (Layer 2)
+ * Designed for SIH 2026 - Akansha (Database Architecture & Data Management)
+ */
+const AKANSHA_DB_SCHEMA = {
+  version: "3.45.0",
+  engine: "SQLite (WAL Mode) / PostgreSQL 16 Ready",
+  lastBackup: "2026-09-05 15:45:00 UTC",
+  totalRows: 14480,
+  tables: [
+    {
+      name: "regions",
+      description: "Master directory of monitored Indian administrative districts, coordinates and baseline capacities.",
+      columns: [
+        { name: "region_id", type: "TEXT PRIMARY KEY", pk: true, desc: "Unique identifier (e.g. 'delhi', 'bundelkhand')" },
+        { name: "region_name", type: "TEXT NOT NULL", pk: false, desc: "District/Metropolitan Name" },
+        { name: "state", type: "TEXT NOT NULL", pk: false, desc: "State / Union Territory" },
+        { name: "lat", type: "REAL NOT NULL", pk: false, desc: "Latitude Coordinate" },
+        { name: "lng", type: "REAL NOT NULL", pk: false, desc: "Longitude Coordinate" },
+        { name: "zone", type: "TEXT", pk: false, desc: "Hydrological River Basin Zone" }
+      ]
+    },
+    {
+      name: "sensor_telemetry",
+      description: "Time-series stream ingesting live IoT reservoir gauges, CGWB borewells and IMD rain gauges.",
+      columns: [
+        { name: "telemetry_id", type: "INTEGER PRIMARY KEY AUTOINCREMENT", pk: true, desc: "Auto-incrementing telemetry sequence" },
+        { name: "region_id", type: "TEXT REFERENCES regions(region_id)", fk: true, desc: "Foreign Key linking district" },
+        { name: "storage_capacity_pct", type: "REAL NOT NULL", pk: false, desc: "Current surface reservoir level (%)" },
+        { name: "groundwater_depth_m", type: "REAL NOT NULL", pk: false, desc: "Water table depth below ground level (m)" },
+        { name: "daily_consumption_mld", type: "INTEGER NOT NULL", pk: false, desc: "Daily urban consumption (Million Liters/Day)" },
+        { name: "rainfall_anomaly_pct", type: "REAL NOT NULL", pk: false, desc: "Monsoon deficit/surplus vs normal (%)" },
+        { name: "risk_status", type: "TEXT NOT NULL", pk: false, desc: "'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'" },
+        { name: "recorded_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", pk: false, desc: "ISO Ingestion Timestamp" }
+      ]
+    },
+    {
+      name: "forecast_4days",
+      description: "AI Model (Deep's Layer 4) predictive inference outputs written to database for Saurav's frontend.",
+      columns: [
+        { name: "forecast_id", type: "INTEGER PRIMARY KEY AUTOINCREMENT", pk: true, desc: "Forecast record identifier" },
+        { name: "region_id", type: "TEXT REFERENCES regions(region_id)", fk: true, desc: "Foreign Key to region" },
+        { name: "day_name", type: "TEXT NOT NULL", pk: false, desc: "'Today', 'Day 2', 'Day 3', 'Day 4'" },
+        { name: "predicted_availability", type: "REAL NOT NULL", pk: false, desc: "AI-predicted water availability index (%)" },
+        { name: "badge_label", type: "TEXT NOT NULL", pk: false, desc: "Risk badge ('Moderate', 'Stressed', 'Critical')" },
+        { name: "generated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", pk: false, desc: "Inference timestamp" }
+      ]
+    },
+    {
+      name: "mcda_risk_weights",
+      description: "Multi-Criteria Decision Analysis parameters designed with Kanika for dynamic weighting.",
+      columns: [
+        { name: "weight_id", type: "INTEGER PRIMARY KEY", pk: true, desc: "Weight configuration ID" },
+        { name: "parameter_name", type: "TEXT NOT NULL", pk: false, desc: "Parameter ('rainfall_deficit', 'storage_level', 'demand')" },
+        { name: "weight_percentage", type: "INTEGER NOT NULL", pk: false, desc: "Assigned weight percentage (0-100%)" },
+        { name: "active_profile", type: "TEXT NOT NULL", pk: false, desc: "'default_monsoon_profile', 'dry_spell_profile'" }
+      ]
+    }
+  ]
+};
+
+const PRESET_SQL_QUERIES = [
+  {
+    id: "query_critical",
+    title: "1. Critical Water Deficits",
+    badge: "EMERGENCY FILTER",
+    sql: `SELECT region_id, region_name, state, storage_capacity_pct, groundwater_depth_m, risk_status \nFROM sensor_telemetry \nWHERE risk_status IN ('HIGH', 'CRITICAL') \nORDER BY storage_capacity_pct ASC;`,
+    description: "Filters all districts currently breaching safe thresholds requiring immediate municipal mitigation."
+  },
+  {
+    id: "query_groundwater",
+    title: "2. Deepest Aquifer Depletion",
+    badge: "CGWB HYDROGRAPH",
+    sql: `SELECT region_name, state, groundwater_depth_m, daily_consumption_mld, risk_status \nFROM sensor_telemetry \nORDER BY groundwater_depth_m DESC \nLIMIT 5;`,
+    description: "Ranks top 5 severely depleted groundwater zones to flag tube-well over-extraction."
+  },
+  {
+    id: "query_forecast",
+    title: "3. Day-4 AI Shortage Warnings",
+    badge: "PREDICTIVE ML",
+    sql: `SELECT r.region_name, r.state, f.day_name, f.predicted_availability, f.badge_label \nFROM forecast_4days f \nJOIN regions r ON f.region_id = r.region_id \nWHERE f.day_name = 'Day 4' AND f.predicted_availability < 35.0 \nORDER BY f.predicted_availability ASC;`,
+    description: "Joins AI inference forecast with region metadata to isolate impending shortages 96 hours ahead."
+  },
+  {
+    id: "query_state_agg",
+    title: "4. State Aggregation & Avg Storage",
+    badge: "MUNICIPAL AGGREGATE",
+    sql: `SELECT state, COUNT(*) AS monitored_districts, ROUND(AVG(storage_capacity_pct), 1) AS avg_storage_pct, ROUND(AVG(groundwater_depth_m), 1) AS avg_gw_depth_m \nFROM sensor_telemetry \nGROUP BY state \nORDER BY avg_storage_pct ASC;`,
+    description: "Computes aggregate state-level water security indices across multi-district monitoring hubs."
+  }
+];
+
+
+
+</script>
+<script>
+/**
+ * Water Intelligence - Cyber Visualisation Layer (Neon Glow Gradient Chart.js)
+ * Prepared for SIH 2026 - Saurav (Frontend & Visualisation Lead)
+ */
+
+let forecastChartInstance = null;
+let historicalChartInstance = null;
+let factorDonutInstance = null;
+
+function isMobile() {
+  return window.innerWidth < 640;
+}
+
+// Global Chart.js Cyber Defaults
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
+
+/**
+ * Creates Vertical Neon Gradients for Bar Charts
+ */
+function createBarGradient(ctx, colorType) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+  switch (colorType) {
+    case 'emerald':
+      gradient.addColorStop(0, '#10b981');
+      gradient.addColorStop(0.5, '#059669');
+      gradient.addColorStop(1, 'rgba(4, 120, 87, 0.25)');
+      break;
+    case 'amber':
+      gradient.addColorStop(0, '#fbbf24');
+      gradient.addColorStop(0.5, '#d97706');
+      gradient.addColorStop(1, 'rgba(180, 83, 9, 0.25)');
+      break;
+    case 'orange':
+      gradient.addColorStop(0, '#fb923c');
+      gradient.addColorStop(0.5, '#ea580c');
+      gradient.addColorStop(1, 'rgba(194, 65, 12, 0.25)');
+      break;
+    case 'rose':
+    case 'critical':
+      gradient.addColorStop(0, '#f43f5e');
+      gradient.addColorStop(0.5, '#e11d48');
+      gradient.addColorStop(1, 'rgba(159, 18, 57, 0.25)');
+      break;
+    case 'cyan':
+    default:
+      gradient.addColorStop(0, '#38bdf8');
+      gradient.addColorStop(0.5, '#0284c7');
+      gradient.addColorStop(1, 'rgba(3, 105, 161, 0.25)');
+      break;
+  }
+  return gradient;
+}
+
+/**
+ * 4-Day Water Availability Forecast Bar Chart (Neon Gradient Edition)
+ */
+function updateForecastChart(next4Days) {
+  const canvas = document.getElementById('forecastChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const mobile = isMobile();
+
+  const labels = next4Days.map(item => item.day);
+  const dataValues = next4Days.map(item => item.value);
+
+  // Determine gradient color based on value
+  const backgroundGradients = next4Days.map(item => {
+    if (item.value >= 50) return createBarGradient(ctx, 'emerald');
+    if (item.value >= 40) return createBarGradient(ctx, 'amber');
+    if (item.value >= 30) return createBarGradient(ctx, 'orange');
+    return createBarGradient(ctx, 'rose');
+  });
+
+  const borderColors = next4Days.map(item => {
+    if (item.value >= 50) return '#34d399';
+    if (item.value >= 40) return '#fbbf24';
+    if (item.value >= 30) return '#fb923c';
+    return '#f43f5e';
+  });
+
+  if (forecastChartInstance) {
+    forecastChartInstance.destroy();
+  }
+
+  forecastChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Water Availability (%)',
+        data: dataValues,
+        backgroundColor: backgroundGradients,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: mobile ? 8 : 12,
+        borderSkipped: false,
+        barPercentage: mobile ? 0.6 : 0.52,
+        categoryPercentage: mobile ? 0.9 : 0.82
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(5, 8, 17, 0.95)',
+          titleColor: '#38bdf8',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(56, 189, 248, 0.4)',
+          borderWidth: 1.5,
+          padding: mobile ? 8 : 12,
+          cornerRadius: 10,
+          displayColors: false,
+          callbacks: {
+            label: function(context) {
+              const idx = context.dataIndex;
+              const badge = next4Days[idx].badge || 'Status';
+              return `  Availability: ${context.parsed.y}% (${badge})`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            callback: function(value) { return value + '%'; },
+            font: { size: mobile ? 9 : 11, weight: '600' },
+            color: '#64748b',
+            stepSize: 25
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.05)',
+            drawBorder: false
+          }
+        },
+        x: {
+          grid: { display: false, drawBorder: false },
+          ticks: {
+            font: { size: mobile ? 11 : 12, weight: '700' },
+            color: '#e2e8f0'
+          }
+        }
+      },
+      animation: {
+        duration: 900,
+        easing: 'easeOutQuart'
+      }
+    }
+  });
+}
+
+/**
+ * Multi-Metric Historical Trend Chart (Neon Wave Edition)
+ */
+function updateHistoricalChart(historical) {
+  const canvas = document.getElementById('historicalChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const mobile = isMobile();
+
+  if (historicalChartInstance) {
+    historicalChartInstance.destroy();
+  }
+
+  // Cyan Area Gradient
+  const cyanGradient = ctx.createLinearGradient(0, 0, 0, 300);
+  cyanGradient.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
+  cyanGradient.addColorStop(0.6, 'rgba(56, 189, 248, 0.1)');
+  cyanGradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+
+  historicalChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: historical.labels.map(l => mobile ? l.replace(' (', '\n(') : l),
+      datasets: [
+        {
+          label: 'Availability (%)',
+          data: historical.availability,
+          borderColor: '#38bdf8',
+          backgroundColor: cyanGradient,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.4,
+          pointRadius: mobile ? 3 : 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#38bdf8',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1.5,
+          yAxisID: 'yAvailability'
+        },
+        {
+          label: 'Rainfall Inflow (mm)',
+          data: historical.rainfall,
+          borderColor: '#10b981',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          tension: 0.35,
+          pointRadius: mobile ? 2 : 4,
+          pointBackgroundColor: '#10b981',
+          yAxisID: 'yRainfall'
+        },
+        {
+          label: 'Consumption (MLD)',
+          data: historical.consumption,
+          borderColor: '#fb923c',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          tension: 0.4,
+          pointRadius: mobile ? 3 : 4,
+          pointBackgroundColor: '#fb923c',
+          yAxisID: 'yConsumption'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 10,
+            boxHeight: 10,
+            usePointStyle: true,
+            color: '#cbd5e1',
+            font: { size: mobile ? 10 : 12, weight: '600' }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(5, 8, 17, 0.95)',
+          borderColor: 'rgba(56, 189, 248, 0.4)',
+          borderWidth: 1.5,
+          padding: mobile ? 8 : 12,
+          cornerRadius: 10,
+          usePointStyle: true
+        }
+      },
+      scales: {
+        yAvailability: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          min: 0,
+          max: 100,
+          title: {
+            display: !mobile,
+            text: 'Availability (%)',
+            color: '#38bdf8',
+            font: { size: 10, weight: '700' }
+          },
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#94a3b8', font: { size: mobile ? 9 : 11, weight: '600' }, callback: val => val + '%' }
+        },
+        yRainfall: {
+          type: 'linear',
+          display: false,
+          position: 'right',
+          grid: { drawOnChartArea: false }
+        },
+        yConsumption: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: {
+            display: !mobile,
+            text: 'Consumption (MLD)',
+            color: '#fb923c',
+            font: { size: 10, weight: '700' }
+          },
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#94a3b8', font: { size: mobile ? 9 : 11, weight: '600' } }
+        },
+        x: {
+          grid: { color: 'rgba(255, 255, 255, 0.03)' },
+          ticks: { color: '#cbd5e1', font: { size: mobile ? 9 : 11, weight: '600' } }
+        }
+      },
+      animation: {
+        duration: 900,
+        easing: 'easeOutQuart'
+      }
+    }
+  });
+}
+
+/**
+ * Factor Contribution Donut Chart (Cyber Donut with Center Stress Gauge)
+ */
+function updateFactorDonut(factors) {
+  const canvas = document.getElementById('factorDonut');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const mobile = isMobile();
+
+  const labels = factors.map(f => f.name);
+  const data = factors.map(f => f.weight);
+  const colors = ['#f43f5e', '#fb923c', '#38bdf8', '#10b981'];
+
+  if (factorDonutInstance) {
+    factorDonutInstance.destroy();
+  }
+
+  // Custom Plugin to Draw Center Text (AI Risk Stress Index)
+  const centerTextPlugin = {
+    id: 'centerText',
+    beforeDraw(chart) {
+      const { width, height, ctx } = chart;
+      ctx.restore();
+      const fontSize = mobile ? 13 : 15;
+      ctx.font = `800 ${fontSize}px 'Plus Jakarta Sans', sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#38bdf8';
+      ctx.textAlign = 'center';
+
+      const topFactor = factors[0] ? factors[0].weight : 42;
+      ctx.fillText(`AI WEIGHTS`, width / 2, height / 2 - 8);
+
+      ctx.font = `700 ${mobile ? 10 : 11}px 'Plus Jakarta Sans', sans-serif`;
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`${factors.length} Signals`, width / 2, height / 2 + 10);
+      ctx.save();
+    }
+  };
+
+  factorDonutInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors.slice(0, factors.length),
+        borderWidth: 2.5,
+        borderColor: '#050811',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 8,
+            boxHeight: 8,
+            usePointStyle: true,
+            color: '#e2e8f0',
+            font: { size: mobile ? 10 : 11, weight: '600' }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(5, 8, 17, 0.95)',
+          borderColor: 'rgba(56, 189, 248, 0.4)',
+          borderWidth: 1.5,
+          padding: mobile ? 8 : 10,
+          cornerRadius: 10,
+          callbacks: {
+            label: function(context) {
+              return `  Contribution: ${context.parsed}%`;
+            }
+          }
+        }
+      }
+    },
+    plugins: [centerTextPlugin]
+  });
+}
+
+// Window resize listener
+window.addEventListener('resize', () => {
+  if (state && state.data && state.currentRegionKey) {
+    const current = state.data[state.currentRegionKey];
+    if (current) {
+      updateForecastChart(current.next4Days);
+      updateHistoricalChart(current.historical);
+      updateFactorDonut(current.factors);
+    }
+  }
+});
+
+</script>
+<script>
+/**
+ * Water Intelligence - Geospatial Map Engine (Cyber Radar Edition)
+ * Prepared for SIH 2026 - Saurav (Frontend & Visualisation Lead)
+ */
+
+let mapInstance = null;
+let markersLayer = null;
+
+const REGION_COORDINATES = {
+  delhi: { lat: 28.6139, lng: 77.2090, label: "Delhi NCR" },
+  bundelkhand: { lat: 25.4484, lng: 79.5678, label: "Bundelkhand" },
+  marathwada: { lat: 19.8762, lng: 75.3433, label: "Marathwada" },
+  jaipur: { lat: 26.9124, lng: 75.7873, label: "Jaipur" },
+  bengaluru: { lat: 12.9716, lng: 77.5946, label: "Bengaluru" },
+  chennai: { lat: 13.0827, lng: 80.2707, label: "Chennai" }
+};
+
+function getStatusColor(status) {
+  switch ((status || "").toUpperCase()) {
+    case "CRITICAL": return "#f43f5e";
+    case "HIGH": return "#fb923c";
+    case "MODERATE": return "#fbbf24";
+    case "LOW":
+    default: return "#10b981";
+  }
+}
+
+/**
+ * Initialize Dark Cyber Leaflet Map
+ */
+function initMap(data, onMarkerClick) {
+  const mapContainer = document.getElementById("map");
+  if (!mapContainer) return;
+
+  if (mapInstance) {
+    mapInstance.remove();
+    mapInstance = null;
+  }
+
+  // Centered on India
+  mapInstance = L.map("map", {
+    center: [22.5, 78.9],
+    zoom: window.innerWidth < 640 ? 4.2 : 4.8,
+    minZoom: 3.5,
+    maxZoom: 10,
+    zoomControl: true
+  });
+
+  // CartoDB Dark Matter High-Res Tiles
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; <a href="https://carto.com/">CartoDB</a> | SIH 2026 Water AI',
+    maxZoom: 19,
+    subdomains: "abcd"
+  }).addTo(mapInstance);
+
+  markersLayer = L.layerGroup().addTo(mapInstance);
+  renderMapMarkers(data, onMarkerClick);
+}
+
+/**
+ * Render Glowing Radar Pins on Map
+ */
+function renderMapMarkers(data, onMarkerClick) {
+  if (!markersLayer || !mapInstance) return;
+  markersLayer.clearLayers();
+
+  Object.keys(data).forEach(key => {
+    const regionData = data[key];
+    if (!regionData || !regionData.lat || !regionData.lng) return;
+
+    const lat = regionData.lat;
+    const lng = regionData.lng;
+    const color = getStatusColor(regionData.status);
+
+    // Glowing Radar Ping Ring (Outer)
+    const pingCircle = L.circleMarker([lat, lng], {
+      radius: 18,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.15,
+      weight: 1,
+      className: 'radar-pulse-marker'
+    }).addTo(markersLayer);
+
+    // Core Solid Telemetry Node (Inner)
+    const marker = L.circleMarker([lat, lng], {
+      radius: 8,
+      fillColor: color,
+      color: "#ffffff",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.95
+    }).addTo(markersLayer);
+
+    // Cyber Tooltip Popup
+    const popupHtml = `
+      <div class="p-2 space-y-1.5 min-w-[190px]">
+        <div class="flex items-center justify-between gap-2 border-b border-slate-700/80 pb-1">
+          <strong class="text-xs font-black text-white">${regionData.name}</strong>
+          <span class="text-[9px] font-black px-1.5 py-0.5 rounded uppercase" style="background-color: ${color}22; color: ${color}; border: 1px solid ${color}66;">
+            ${regionData.status}
+          </span>
+        </div>
+        <div class="text-[10px] space-y-1 text-slate-300">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Storage Level:</span>
+            <span class="font-bold text-white">${regionData.storageLevel.value}%</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Groundwater:</span>
+            <span class="font-bold text-white">${regionData.groundwaterDepth.value}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Consumption:</span>
+            <span class="font-bold text-sky-300">${regionData.dailyConsumption}</span>
+          </div>
+        </div>
+        <button 
+          onclick="window.selectRegion('${key}')" 
+          class="w-full mt-1.5 py-1 px-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-[10px] font-black tracking-wide shadow-md transition-all active:scale-95 text-center cursor-pointer block"
+        >
+          Inspect Live Node ➔
+        </button>
+      </div>
+    `;
+
+    marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -5] });
+    pingCircle.bindPopup(popupHtml, { closeButton: false, offset: [0, -5] });
+
+    marker.on("click", () => {
+      if (onMarkerClick) onMarkerClick(key);
+    });
+  });
+}
+
+/**
+ * Smoothly Pan Map to Selected Region
+ */
+function focusMapRegion(regionKey, data) {
+  if (!mapInstance) return;
+  const regionData = data ? data[regionKey] : null;
+  if (regionData && regionData.lat && regionData.lng) {
+    mapInstance.flyTo([regionData.lat, regionData.lng], 6.5, {
+      duration: 1.2,
+      easeLinearity: 0.25
+    });
+  } else if (REGION_COORDINATES[regionKey]) {
+    const coords = REGION_COORDINATES[regionKey];
+    mapInstance.flyTo([coords.lat, coords.lng], 6.5, {
+      duration: 1.2,
+      easeLinearity: 0.25
+    });
+  }
+}
+
+</script>
+<script>
+/**
+ * Water Intelligence - Main Application Controller (Dynamic Live Telemetry Edition)
+ * Prepared for SIH 2026 - Saurav (Frontend, Dashboard & Data Visualisation)
+ */
+
+const CORRECT_PIN = "2026";
+
+// Application State
+const state = {
+  currentRegionKey: "delhi",
+  isLiveApiMode: false,
+  backendApiUrl: "http://127.0.0.1:5000/api/water-intelligence",
+  data: JSON.parse(JSON.stringify(REGION_DATA)), // Clone deep copy for dynamic mutations
+  isUnlocked: false,
+  autoStreamInterval: null,
+  isAutoStreamActive: true
+};
+
+// Expose selectRegion globally for Leaflet map popups
+window.selectRegion = function(regionKey) {
+  if (state.data[regionKey]) {
+    state.currentRegionKey = regionKey;
+    const regionSelect = document.getElementById("regionSelect");
+    if (regionSelect) regionSelect.value = regionKey;
+    renderDashboard(regionKey);
+    focusMapRegion(regionKey, state.data);
+  }
+};
+
+// Lock/Unlock Functions
+window.lockDashboard = function() {
+  localStorage.removeItem("wi_dashboard_unlocked");
+  state.isUnlocked = false;
+  const lockModal = document.getElementById("lockModal");
+  if (lockModal) {
+    lockModal.classList.remove("hidden");
+    lockModal.classList.remove("opacity-0");
+  }
+  const pinInput = document.getElementById("pinInput");
+  if (pinInput) {
+    pinInput.value = "";
+    pinInput.focus();
+  }
+};
+
+window.unlockDashboard = function() {
+  const pinInput = document.getElementById("pinInput");
+  const errorMsg = document.getElementById("pinErrorMsg");
+  const lockCard = document.getElementById("lockCard");
+  const enteredPin = pinInput ? pinInput.value.trim() : "";
+
+  if (enteredPin === CORRECT_PIN) {
+    localStorage.setItem("wi_dashboard_unlocked", "true");
+    state.isUnlocked = true;
+    
+    if (errorMsg) errorMsg.classList.add("hidden");
+
+    const lockModal = document.getElementById("lockModal");
+    if (lockModal) {
+      lockModal.classList.add("transition-all", "duration-500", "opacity-0", "pointer-events-none");
+      setTimeout(() => {
+        lockModal.classList.add("hidden");
+      }, 500);
+    }
+
+    setTimeout(() => {
+      renderDashboard(state.currentRegionKey);
+      if (mapInstance) mapInstance.invalidateSize();
+    }, 100);
+
+  } else {
+    if (errorMsg) {
+      errorMsg.textContent = "Incorrect Security PIN. Please try again.";
+      errorMsg.classList.remove("hidden");
+    }
+    if (lockCard) {
+      lockCard.classList.remove("animate-shake");
+      void lockCard.offsetWidth; // Trigger reflow
+      lockCard.classList.add("animate-shake");
+    }
+    if (pinInput) {
+      pinInput.value = "";
+      pinInput.focus();
+    }
+  }
+};
+
+/**
+ * Main DOM Content Loaded Event Listener
+ */
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
+  // Setup Lock Screen
+  setupLockScreen();
+
+  // Populate Dropdown
+  setupRegionDropdown();
+
+  // Initialize Map
+  initMap(state.data, (selectedKey) => {
+    state.currentRegionKey = selectedKey;
+    const regionSelect = document.getElementById("regionSelect");
+    if (regionSelect) regionSelect.value = selectedKey;
+    renderDashboard(selectedKey);
+  });
+
+  // Apply initial dynamic micro-jitter on fresh load
+  applyLiveTelemetryJitter(state.currentRegionKey, false);
+
+  // Initial Dashboard Render
+  renderDashboard(state.currentRegionKey);
+
+  // Setup Event Listeners
+  setupEventListeners();
+
+  // Initialize Akansha's Database Hub & SQL Simulator
+  initDatabaseTab();
+
+  // Start Live Streaming Auto-Update (Every 6 Seconds)
+  startLiveAutoStream();
+});
+
+/**
+ * Setup Lock Screen
+ */
+function setupLockScreen() {
+  const isUnlocked = localStorage.getItem("wi_dashboard_unlocked") === "true";
+  const lockModal = document.getElementById("lockModal");
+  const pinInput = document.getElementById("pinInput");
+  const unlockBtn = document.getElementById("unlockBtn");
+
+  if (isUnlocked) {
+    state.isUnlocked = true;
+    if (lockModal) lockModal.classList.add("hidden");
+  } else {
+    state.isUnlocked = false;
+    if (lockModal) {
+      lockModal.classList.remove("hidden");
+      if (pinInput) setTimeout(() => pinInput.focus(), 200);
+    }
+  }
+
+  if (unlockBtn) {
+    unlockBtn.addEventListener("click", window.unlockDashboard);
+  }
+
+  if (pinInput) {
+    pinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        window.unlockDashboard();
+      }
+    });
+  }
+}
+
+function setupRegionDropdown() {
+  const select = document.getElementById("regionSelect");
+  if (!select) return;
+
+  select.innerHTML = "";
+  Object.keys(state.data).forEach(key => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = `${state.data[key].name} (${state.data[key].state})`;
+    option.className = "bg-slate-900 text-slate-100 py-1";
+    if (key === state.currentRegionKey) option.selected = true;
+    select.appendChild(option);
+  });
+}
+
+function setupEventListeners() {
+  // Region Dropdown change
+  const regionSelect = document.getElementById("regionSelect");
+  if (regionSelect) {
+    regionSelect.addEventListener("change", (e) => {
+      window.selectRegion(e.target.value);
+    });
+  }
+
+  // Tab switching
+  const tabButtons = document.querySelectorAll("[data-tab-target]");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-tab-target");
+      switchTab(target);
+    });
+  });
+
+  // Manual Live Fetch / Refresh Button
+  const btnManualRefresh = document.getElementById("btnManualRefresh");
+  if (btnManualRefresh) {
+    btnManualRefresh.addEventListener("click", () => {
+      const icon = document.getElementById("refreshIcon");
+      if (icon) {
+        icon.classList.remove("spinning-icon");
+        void icon.offsetWidth;
+        icon.classList.add("spinning-icon");
+      }
+      applyLiveTelemetryJitter(state.currentRegionKey, true);
+      renderDashboard(state.currentRegionKey);
+    });
+  }
+
+  // Auto-Stream Toggle
+  const autoStreamToggle = document.getElementById("autoStreamToggle");
+  if (autoStreamToggle) {
+    autoStreamToggle.addEventListener("change", (e) => {
+      state.isAutoStreamActive = e.target.checked;
+      const pulsePing = document.getElementById("livePulsePing");
+      const pulseDot = document.getElementById("livePulseDot");
+      const statusText = document.getElementById("liveStatusText");
+
+      if (state.isAutoStreamActive) {
+        startLiveAutoStream();
+        if (pulsePing) pulsePing.classList.remove("hidden");
+        if (pulseDot) pulseDot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
+        if (statusText) statusText.textContent = "Live Stream (6s)";
+      } else {
+        stopLiveAutoStream();
+        if (pulsePing) pulsePing.classList.add("hidden");
+        if (pulseDot) pulseDot.className = "relative inline-flex rounded-full h-2 w-2 bg-slate-500";
+        if (statusText) statusText.textContent = "Stream Paused";
+      }
+    });
+  }
+
+  // Quick Action Button (Simulation)
+  const btnTriggerSim = document.getElementById("btnTriggerSim");
+  if (btnTriggerSim) {
+    btnTriggerSim.addEventListener("click", () => {
+      simulatePredictionDrift();
+    });
+  }
+
+  // Header Lock Button
+  const btnLockScreen = document.getElementById("btnLockScreen");
+  if (btnLockScreen) {
+    btnLockScreen.addEventListener("click", () => {
+      window.lockDashboard();
+    });
+  }
+
+  // Kanika's MCDA Simulator Slider Listeners
+  setupMCDASimulatorListeners();
+}
+
+/**
+ * Kanika's Multi-Criteria Decision Analysis (MCDA) Simulator Logic
+ */
+function setupMCDASimulatorListeners() {
+  const sRainfall = document.getElementById("sliderRainfall");
+  const sStorage = document.getElementById("sliderStorage");
+  const sConsumption = document.getElementById("sliderConsumption");
+
+  [sRainfall, sStorage, sConsumption].forEach(slider => {
+    if (slider) {
+      slider.addEventListener("input", updateMCDACalculation);
+    }
+  });
+
+  updateMCDACalculation();
+}
+
+function updateMCDACalculation() {
+  const sRainfall = document.getElementById("sliderRainfall");
+  const sStorage = document.getElementById("sliderStorage");
+  const sConsumption = document.getElementById("sliderConsumption");
+
+  const w1 = sRainfall ? parseInt(sRainfall.value) : 40;
+  const w2 = sStorage ? parseInt(sStorage.value) : 35;
+  const w3 = sConsumption ? parseInt(sConsumption.value) : 25;
+
+  const lRain = document.getElementById("labelRainfallWeight");
+  const lStore = document.getElementById("labelStorageWeight");
+  const lCons = document.getElementById("labelConsumptionWeight");
+
+  if (lRain) lRain.textContent = `${w1}%`;
+  if (lStore) lStore.textContent = `${w2}%`;
+  if (lCons) lCons.textContent = `${w3}%`;
+
+  // Formula: S = (w1 * 85 + w2 * 72 + w3 * 64) / (w1 + w2 + w3)
+  const totalWeight = (w1 + w2 + w3) || 100;
+  const compositeScore = ((w1 * 88 + w2 * 74 + w3 * 62) / totalWeight).toFixed(1);
+
+  const scoreDisplay = document.getElementById("mcdaScoreDisplay");
+  const riskClass = document.getElementById("mcdaRiskClassification");
+
+  if (scoreDisplay) scoreDisplay.textContent = compositeScore;
+
+  if (riskClass) {
+    if (compositeScore >= 80) {
+      riskClass.textContent = "CRITICAL VULNERABILITY (STAGE 4)";
+      riskClass.className = "text-base font-black text-rose-400";
+    } else if (compositeScore >= 65) {
+      riskClass.textContent = "HIGH VULNERABILITY (STAGE 3)";
+      riskClass.className = "text-base font-black text-orange-400";
+    } else if (compositeScore >= 50) {
+      riskClass.textContent = "MODERATE STRESS (STAGE 2)";
+      riskClass.className = "text-base font-black text-amber-400";
+    } else {
+      riskClass.textContent = "NORMAL BASELINE (STAGE 1)";
+      riskClass.className = "text-base font-black text-emerald-400";
+    }
+  }
+}
+
+window.resetMCDASimulator = function() {
+  const sRainfall = document.getElementById("sliderRainfall");
+  const sStorage = document.getElementById("sliderStorage");
+  const sConsumption = document.getElementById("sliderConsumption");
+
+  if (sRainfall) sRainfall.value = 40;
+  if (sStorage) sStorage.value = 35;
+  if (sConsumption) sConsumption.value = 25;
+
+  updateMCDACalculation();
+};
+
+/**
+ * Starts automatic telemetry polling/simulation
+ */
+function startLiveAutoStream() {
+  if (state.autoStreamInterval) clearInterval(state.autoStreamInterval);
+  state.autoStreamInterval = setInterval(() => {
+    if (state.isAutoStreamActive) {
+      applyLiveTelemetryJitter(state.currentRegionKey, false);
+      renderDashboard(state.currentRegionKey);
+    }
+  }, 6000);
+}
+
+function stopLiveAutoStream() {
+  if (state.autoStreamInterval) {
+    clearInterval(state.autoStreamInterval);
+    state.autoStreamInterval = null;
+  }
+}
+
+/**
+ * Generates realistic dynamic micro-fluctuations simulating live IoT telemetry & weather feeds
+ */
+function applyLiveTelemetryJitter(regionKey, isManual) {
+  const baseData = REGION_DATA[regionKey];
+  if (!baseData) return;
+
+  // Clone fresh from base
+  const updated = JSON.parse(JSON.stringify(baseData));
+
+  // 1. Storage micro variance (+/- 0.8%)
+  const storageJitter = (Math.random() * 1.6 - 0.8);
+  const newStorage = Math.max(8, Math.min(96, Number((baseData.storageLevel.value + storageJitter).toFixed(1))));
+  updated.storageLevel.value = newStorage;
+
+  // 2. Groundwater depth micro variance (+/- 0.15m)
+  const gwJitter = (Math.random() * 0.3 - 0.15);
+  const baseGwNum = parseFloat(baseData.groundwaterDepth.value);
+  if (!isNaN(baseGwNum)) {
+    updated.groundwaterDepth.value = `${(baseGwNum + gwJitter).toFixed(1)} m`;
+  }
+
+  // 3. Urban Consumption variance (+/- 4 MLD)
+  const baseCons = parseInt(baseData.dailyConsumption);
+  if (!isNaN(baseCons)) {
+    const consJitter = Math.floor(Math.random() * 9 - 4);
+    updated.dailyConsumption = `${baseCons + consJitter} MLD`;
+  }
+
+  // 4. ML 4-Day Forecast slight dynamic adjustment
+  updated.next4Days = baseData.next4Days.map((item, idx) => {
+    const dayJitter = Math.floor(Math.random() * 5 - 2);
+    const val = Math.max(10, Math.min(95, item.value + dayJitter));
+    return {
+      ...item,
+      value: val
+    };
+  });
+
+  state.data[regionKey] = updated;
+
+  // Update live timestamp
+  const now = new Date();
+  const timeStr = now.toTimeString().split(" ")[0];
+  const lastUpdatedEl = document.getElementById("lastUpdatedBadge");
+  if (lastUpdatedEl) {
+    lastUpdatedEl.innerHTML = `<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-ping"></span> Live Ingested: ${timeStr}`;
+  }
+
+  // Update Database Tab live table & row counts
+  totalSimulatedDbRows += Math.floor(Math.random() * 2 + 1);
+  const rowCountEl = document.getElementById("dbRowCountDisplay");
+  if (rowCountEl) {
+    rowCountEl.textContent = `${totalSimulatedDbRows.toLocaleString()} Rows`;
+  }
+  renderDatabaseTable();
+
+  // Flash cards on update
+  flashMetricCards();
+}
+
+function flashMetricCards() {
+  const elements = [
+    document.getElementById("storageValue"),
+    document.getElementById("groundwaterValue"),
+    document.getElementById("consumptionValue")
+  ];
+
+  elements.forEach(el => {
+    if (el) {
+      el.classList.remove("flash-update");
+      void el.offsetWidth;
+      el.classList.add("flash-update");
+    }
+  });
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll("[data-tab-target]").forEach(btn => {
+    if (btn.getAttribute("data-tab-target") === tabId) {
+      btn.className = "tab-btn active-tab px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold border-b-2 border-sky-400 text-sky-400 flex items-center gap-1.5 rounded-lg shrink-0";
+    } else {
+      btn.className = "tab-btn px-3.5 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 rounded-lg shrink-0";
+    }
+  });
+
+  document.querySelectorAll(".tab-panel").forEach(panel => {
+    panel.classList.add("hidden");
+  });
+  const activePanel = document.getElementById(tabId);
+  if (activePanel) {
+    activePanel.classList.remove("hidden");
+  }
+
+  if (tabId === "map-view-tab" && mapInstance) {
+    setTimeout(() => {
+      mapInstance.invalidateSize();
+    }, 150);
+  }
+
+  if (tabId === "database-hub-tab") {
+    renderDatabaseTable();
+    executeActiveSqlQuery();
+  }
+}
+
+function renderDashboard(regionKey) {
+  const data = state.data[regionKey];
+  if (!data) return;
+
+  // 1. Header
+  setText("regionTitle", data.name);
+  setText("regionSubtitle", `Monitoring Zone: ${data.state} · Real-time Sensor Ingestion`);
+
+  // 2. Risk Status Badge
+  renderRiskStatusBadge(data.status, data.statusText);
+
+  // 3. KPI Cards
+  setText("trendValue", `${data.waterTrend.direction === 'down' ? '↓' : '↑'} ${data.waterTrend.label}`);
+  setText("trendDelta", `${data.waterTrend.change} baseline variance`);
+  const trendEl = document.getElementById("trendValue");
+  if (trendEl) {
+    trendEl.className = data.waterTrend.direction === 'down' 
+      ? 'text-base sm:text-xl font-black text-rose-400 flex items-center gap-1' 
+      : 'text-base sm:text-xl font-black text-emerald-400 flex items-center gap-1';
+  }
+
+  setText("forecast7dValue", data.forecast7d.label);
+  setText("forecast7dNote", data.forecast7d.note);
+
+  setText("storageValue", `${data.storageLevel.value}%`);
+  setText("storageNote", data.storageLevel.label);
+  const storageBar = document.getElementById("storageProgressBar");
+  if (storageBar) {
+    storageBar.style.width = `${Math.min(100, Math.max(0, data.storageLevel.value))}%`;
+  }
+  setText("groundwaterValue", data.groundwaterDepth.value);
+  setText("groundwaterNote", data.groundwaterDepth.label);
+  setText("consumptionValue", data.dailyConsumption);
+  setText("rainfallAnomalyValue", data.rainfallAnomaly);
+
+  // 4. Update Charts
+  updateForecastChart(data.next4Days);
+  updateHistoricalChart(data.historical);
+  updateFactorDonut(data.factors);
+
+  // 5. Render Early Warning Alert
+  renderAlertBanner(data);
+
+  // 6. Render Contributing Factors
+  renderFactorsList(data.factors);
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+function renderRiskStatusBadge(status, statusText) {
+  const badge = document.getElementById("statusBadge");
+  if (!badge) return;
+
+  let colorClasses = "";
+  let iconName = "alert-triangle";
+
+  switch (status.toUpperCase()) {
+    case "CRITICAL":
+      colorClasses = "bg-rose-950/90 text-rose-300 border-rose-500/60 shadow-lg shadow-rose-950/40 animate-pulse";
+      iconName = "alert-octagon";
+      break;
+    case "HIGH":
+      colorClasses = "bg-orange-950/90 text-orange-300 border-orange-500/60 shadow-lg shadow-orange-950/40";
+      iconName = "alert-triangle";
+      break;
+    case "MODERATE":
+      colorClasses = "bg-amber-950/90 text-amber-300 border-amber-500/60 shadow-lg shadow-amber-950/40";
+      iconName = "info";
+      break;
+    case "LOW":
+    default:
+      colorClasses = "bg-emerald-950/90 text-emerald-300 border-emerald-500/60 shadow-lg shadow-emerald-950/40";
+      iconName = "check-circle-2";
+      break;
+  }
+
+  badge.className = `px-3 py-1.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider border flex items-center gap-1.5 ${colorClasses}`;
+  badge.innerHTML = `<i data-lucide="${iconName}" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> ${status} RISK`;
+}
+
+function renderAlertBanner(data) {
+  const alertContainer = document.getElementById("alertBannerContainer");
+  if (!alertContainer) return;
+
+  const alert = data.alert;
+  if (!alert) {
+    alertContainer.innerHTML = "";
+    return;
+  }
+
+  const isHighOrCritical = data.status === "HIGH" || data.status === "CRITICAL";
+  const bgClass = isHighOrCritical 
+    ? "bg-rose-950/40 border-rose-800/60 text-rose-100" 
+    : "bg-emerald-950/40 border-emerald-800/60 text-emerald-100";
+  const badgeClass = isHighOrCritical ? "bg-rose-600 text-white" : "bg-emerald-600 text-white";
+
+  alertContainer.innerHTML = `
+    <div class="rounded-2xl border p-4 sm:p-5 ${bgClass} backdrop-blur shadow-lg">
+      <div class="flex items-start gap-3 sm:gap-3.5">
+        <div class="p-2 sm:p-2.5 rounded-xl ${badgeClass} shrink-0 mt-0.5 shadow-md">
+          <i data-lucide="${isHighOrCritical ? 'alert-triangle' : 'shield-check'}" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <h4 class="font-black text-sm sm:text-base tracking-tight text-white">${alert.title}</h4>
+            <span class="text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-black uppercase ${badgeClass}">${data.status}</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300 mb-3">${alert.summary}</p>
+          
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3">
+            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 mr-1">Main Factors:</span>
+            ${data.factors.map(f => `
+              <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-900/90 border border-slate-700 text-slate-200">
+                <span class="${f.trend === 'down' ? 'text-rose-400 font-black' : 'text-amber-400 font-black'}">${f.trend === 'down' ? '↓' : '↑'}</span>
+                <span>${f.name}</span>
+              </span>
+            `).join('')}
+          </div>
+
+          <div class="bg-slate-900/90 rounded-xl p-3 sm:p-4 border border-slate-800">
+            <p class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-sky-400 mb-1.5 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i> Proactive Decision Support (Early Action):
+            </p>
+            <ul class="space-y-1 text-xs text-slate-300 list-disc list-inside">
+              ${alert.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFactorsList(factors) {
+  const container = document.getElementById("factorsListContainer");
+  if (!container) return;
+
+  container.innerHTML = factors.map(factor => `
+    <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 transition">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-bold text-slate-200 flex items-center gap-1">
+          <span class="font-bold ${factor.trend === 'down' ? 'text-rose-400' : 'text-amber-400'}">
+            ${factor.trend === 'down' ? '↓' : '↑'}
+          </span>
+          ${factor.name}
+        </span>
+        <span class="text-[10px] sm:text-[11px] font-black text-sky-300 bg-sky-950/80 px-2 py-0.5 rounded-full border border-sky-500/30">
+          ${factor.weight}% weight
+        </span>
+      </div>
+      <p class="text-[11px] text-slate-400 leading-relaxed">${factor.desc}</p>
+    </div>
+  `).join('');
+}
+
+function simulatePredictionDrift() {
+  const current = state.data[state.currentRegionKey];
+  if (!current) return;
+
+  current.status = "CRITICAL";
+  current.statusText = "Simulated Heatwave & Inflow Shock";
+  current.waterTrend = { label: "Severe Plunge", change: "-34%", direction: "down" };
+  current.next4Days = [
+    { day: "Today", value: 45, color: "#fb923c", badge: "Stressed" },
+    { day: "Day 2", value: 32, color: "#f87171", badge: "Critical" },
+    { day: "Day 3", value: 20, color: "#ef4444", badge: "Severe" },
+    { day: "Day 4", value: 14, color: "#991b1b", badge: "Emergency" }
+  ];
+  current.alert.title = "SIMULATION ALERT: Accelerated Aquifer Depletion";
+  current.alert.summary = "Deep learning model flags high probability of reservoir head exhaustion within 96 hours.";
+
+  renderDashboard(state.currentRegionKey);
+  flashMetricCards();
+}
+
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+/**
+ * =========================================================================
+ * Akansha's Relational Database & SQL Telemetry Module (Layer 2)
+ * =========================================================================
+ */
+
+let activePresetQueryId = "query_critical";
+let totalSimulatedDbRows = 14480;
+
+function initDatabaseTab() {
+  // Load first preset query into editor
+  loadPresetQuery("query_critical");
+
+  // Render initial SQL Live Ingestion Table
+  renderDatabaseTable();
+
+  // Setup DB tab event listeners
+  setupDatabaseListeners();
+}
+
+window.loadPresetQuery = function(presetId) {
+  const preset = PRESET_SQL_QUERIES.find(p => p.id === presetId);
+  if (!preset) return;
+
+  activePresetQueryId = presetId;
+  const editor = document.getElementById("sqlInputEditor");
+  const descEl = document.getElementById("activePresetDesc");
+
+  if (editor) editor.value = preset.sql;
+  if (descEl) descEl.textContent = preset.description;
+
+  // Execute query immediately to display results
+  executeActiveSqlQuery();
+};
+
+function setupDatabaseListeners() {
+  const btnRun = document.getElementById("btnRunQuery");
+  if (btnRun) {
+    btnRun.addEventListener("click", () => {
+      executeActiveSqlQuery();
+    });
+  }
+
+  const btnReset = document.getElementById("btnResetQuery");
+  if (btnReset) {
+    btnReset.addEventListener("click", () => {
+      loadPresetQuery("query_critical");
+    });
+  }
+
+  const dbSearch = document.getElementById("dbSearchInput");
+  if (dbSearch) {
+    dbSearch.addEventListener("input", filterDatabaseTable);
+  }
+
+  const dbFilter = document.getElementById("dbRiskFilter");
+  if (dbFilter) {
+    dbFilter.addEventListener("change", filterDatabaseTable);
+  }
+
+  const btnCsv = document.getElementById("btnExportCsv");
+  if (btnCsv) {
+    btnCsv.addEventListener("click", exportDatabaseCSV);
+  }
+
+  const btnSqlDump = document.getElementById("btnExportSqlDump");
+  if (btnSqlDump) {
+    btnSqlDump.addEventListener("click", exportDatabaseSqlDump);
+  }
+}
+
+function executeActiveSqlQuery() {
+  const editor = document.getElementById("sqlInputEditor");
+  const sqlText = editor ? editor.value.trim() : "";
+  const container = document.getElementById("queryResultContainer");
+  const metaBadge = document.getElementById("queryResultMeta");
+  const statusBadge = document.getElementById("queryExecBadge");
+
+  const startTime = performance.now();
+
+  let columns = [];
+  let rows = [];
+
+  // Parse query based on SQL keywords
+  const upperSql = sqlText.toUpperCase();
+
+  if (upperSql.includes("GROUP BY STATE") || activePresetQueryId === "query_state_agg") {
+    // State Aggregation Query
+    columns = ["state", "monitored_districts", "avg_storage_pct", "avg_gw_depth_m", "status_summary"];
+    const stateMap = {};
+    Object.keys(state.data).forEach(k => {
+      const d = state.data[k];
+      if (!stateMap[d.state]) {
+        stateMap[d.state] = { count: 0, totalStorage: 0, totalGw: 0, risks: [] };
+      }
+      stateMap[d.state].count++;
+      stateMap[d.state].totalStorage += Number(d.storageLevel.value);
+      stateMap[d.state].totalGw += parseFloat(d.groundwaterDepth.value) || 25;
+      stateMap[d.state].risks.push(d.status);
+    });
+
+    rows = Object.keys(stateMap).map(st => {
+      const item = stateMap[st];
+      const avgStorage = (item.totalStorage / item.count).toFixed(1);
+      const avgGw = (item.totalGw / item.count).toFixed(1);
+      const hasCritical = item.risks.includes("CRITICAL");
+      const hasHigh = item.risks.includes("HIGH");
+      const summary = hasCritical ? "CRITICAL RISK" : (hasHigh ? "HIGH STRESS" : "STABLE BUFFER");
+      return [st, item.count, `${avgStorage}%`, `${avgGw} m`, summary];
+    });
+
+  } else if (upperSql.includes("FORECAST_4DAYS") || activePresetQueryId === "query_forecast") {
+    // 4-Day Forecast Query
+    columns = ["region_id", "region_name", "state", "day_name", "predicted_availability", "badge_label"];
+    Object.keys(state.data).forEach(k => {
+      const d = state.data[k];
+      const day4 = d.next4Days[3] || d.next4Days[d.next4Days.length - 1];
+      rows.push([
+        k,
+        d.name,
+        d.state,
+        day4.day || "Day 4",
+        `${day4.value}%`,
+        day4.badge || "Stressed"
+      ]);
+    });
+    // Sort ascending by availability
+    rows.sort((a, b) => parseFloat(a[4]) - parseFloat(b[4]));
+
+  } else if (upperSql.includes("GROUNDWATER_DEPTH_M DESC") || activePresetQueryId === "query_groundwater") {
+    // Deepest Aquifer Query
+    columns = ["region_id", "region_name", "state", "groundwater_depth_m", "daily_consumption", "risk_status"];
+    const list = Object.keys(state.data).map(k => state.data[k]);
+    list.sort((a, b) => {
+      const gA = parseFloat(a.groundwaterDepth.value) || 0;
+      const gB = parseFloat(b.groundwaterDepth.value) || 0;
+      return gB - gA;
+    });
+
+    rows = list.slice(0, 5).map(d => [
+      d.name.toLowerCase().replace(/[^a-z]/g, '').slice(0, 6),
+      d.name,
+      d.state,
+      d.groundwaterDepth.value,
+      d.dailyConsumption,
+      d.status
+    ]);
+
+  } else {
+    // Default / Critical Risk Filter Query
+    columns = ["region_id", "region_name", "state", "storage_capacity_pct", "groundwater_depth_m", "risk_status"];
+    Object.keys(state.data).forEach(k => {
+      const d = state.data[k];
+      if (d.status === "CRITICAL" || d.status === "HIGH" || !upperSql.includes("CRITICAL")) {
+        rows.push([
+          k,
+          d.name,
+          d.state,
+          `${d.storageLevel.value}%`,
+          d.groundwaterDepth.value,
+          d.status
+        ]);
+      }
+    });
+    rows.sort((a, b) => parseFloat(a[3]) - parseFloat(b[3]));
+  }
+
+  const endTime = performance.now();
+  const execTime = (endTime - startTime + (Math.random() * 0.4 + 0.6)).toFixed(2);
+
+  if (metaBadge) {
+    metaBadge.textContent = `${rows.length} records retrieved in ${execTime} ms`;
+  }
+  if (statusBadge) {
+    statusBadge.textContent = `⚡ Executed in ${execTime} ms · 0 Errors`;
+  }
+
+  if (container) {
+    container.innerHTML = `
+      <table class="w-full text-left text-xs font-mono">
+        <thead class="bg-slate-900 text-sky-400 border-b border-slate-800 text-[10px] uppercase tracking-wider">
+          <tr>
+            <th class="py-2 px-3 text-slate-500">#</th>
+            ${columns.map(col => `<th class="py-2 px-3">${col}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-900 text-slate-300">
+          ${rows.map((row, idx) => `
+            <tr class="hover:bg-slate-900/60 transition">
+              <td class="py-2 px-3 text-slate-600">${idx + 1}</td>
+              ${row.map(val => {
+                let badgeClass = "";
+                if (val === "CRITICAL" || val === "Emergency") badgeClass = "text-rose-400 font-bold bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800";
+                else if (val === "HIGH" || val === "High Risk" || val === "Severe") badgeClass = "text-orange-400 font-bold bg-orange-950/80 px-1.5 py-0.5 rounded border border-orange-800";
+                else if (val === "MODERATE" || val === "Stressed" || val === "HIGH STRESS") badgeClass = "text-amber-400 font-bold bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-800";
+                else if (val === "LOW" || val === "Normal" || val === "STABLE BUFFER") badgeClass = "text-emerald-400 font-bold bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800";
+
+                return `<td class="py-2 px-3 ${badgeClass ? '' : 'text-slate-300'}">${badgeClass ? `<span class="${badgeClass}">${val}</span>` : val}</td>`;
+              }).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+}
+
+function renderDatabaseTable() {
+  const tbody = document.getElementById("dbLiveTableBody");
+  if (!tbody) return;
+
+  const searchInput = document.getElementById("dbSearchInput");
+  const riskFilter = document.getElementById("dbRiskFilter");
+
+  const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const filter = riskFilter ? riskFilter.value : "ALL";
+
+  const entries = Object.keys(state.data).map(key => ({
+    key,
+    ...state.data[key]
+  }));
+
+  const filtered = entries.filter(item => {
+    const matchesSearch = !query || 
+      item.name.toLowerCase().includes(query) || 
+      item.state.toLowerCase().includes(query) || 
+      item.key.toLowerCase().includes(query);
+    const matchesRisk = filter === "ALL" || item.status.toUpperCase() === filter;
+    return matchesSearch && matchesRisk;
+  });
+
+  tbody.innerHTML = filtered.map(item => {
+    let riskBadge = "";
+    switch (item.status) {
+      case "CRITICAL":
+        riskBadge = `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-600 font-bold">CRITICAL</span>`;
+        break;
+      case "HIGH":
+        riskBadge = `<span class="px-2 py-0.5 rounded bg-orange-950 text-orange-300 border border-orange-600 font-bold">HIGH</span>`;
+        break;
+      case "MODERATE":
+        riskBadge = `<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 font-bold">MODERATE</span>`;
+        break;
+      case "LOW":
+      default:
+        riskBadge = `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-600 font-bold">LOW</span>`;
+        break;
+    }
+
+    return `
+      <tr class="hover:bg-slate-900/80 transition">
+        <td class="py-2 px-3 font-mono text-sky-400 font-bold">${item.key}</td>
+        <td class="py-2 px-3 font-sans font-bold text-white">${item.name}</td>
+        <td class="py-2 px-3 text-slate-400 font-sans">${item.state}</td>
+        <td class="py-2 px-3 font-mono text-emerald-400 font-bold">${item.storageLevel.value}%</td>
+        <td class="py-2 px-3 font-mono text-amber-300">${item.groundwaterDepth.value}</td>
+        <td class="py-2 px-3 font-mono text-slate-300">${item.dailyConsumption}</td>
+        <td class="py-2 px-3 font-mono text-rose-400">${item.rainfallAnomaly}</td>
+        <td class="py-2 px-3">${riskBadge}</td>
+        <td class="py-2 px-3 text-right">
+          <button onclick="window.selectRegion('${item.key}'); switchTab('dashboard-tab');" class="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-600 transition cursor-pointer">
+            Inspect →
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  const summary = document.getElementById("dbTableSummaryText");
+  if (summary) {
+    summary.textContent = `Showing ${filtered.length} of ${entries.length} active district telemetry nodes`;
+  }
+}
+
+function filterDatabaseTable() {
+  renderDatabaseTable();
+}
+
+function exportDatabaseCSV() {
+  const entries = Object.keys(state.data).map(k => state.data[k]);
+  const headers = ["region_id", "region_name", "state", "storage_capacity_pct", "groundwater_depth_m", "daily_consumption_mld", "rainfall_anomaly", "risk_status", "ingestion_timestamp"];
+
+  const rows = entries.map(item => [
+    item.name.toLowerCase().replace(/[^a-z]/g, ''),
+    `"${item.name}"`,
+    `"${item.state}"`,
+    item.storageLevel.value,
+    `"${item.groundwaterDepth.value}"`,
+    `"${item.dailyConsumption}"`,
+    `"${item.rainfallAnomaly}"`,
+    item.status,
+    `"${new Date().toISOString()}"`
+  ]);
+
+  const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `water_intelligence_telemetry_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportDatabaseSqlDump() {
+  const entries = Object.keys(state.data).map(k => ({ key: k, ...state.data[k] }));
+
+  let sqlDump = `-- ==========================================================\n`;
+  sqlDump += `-- Water Intelligence — SQLite / PostgreSQL Telemetry DDL\n`;
+  sqlDump += `-- Smart India Hackathon 2026 — Layer 2 Data Storage (Akansha)\n`;
+  sqlDump += `-- Ingestion Date: ${new Date().toUTCString()}\n`;
+  sqlDump += `-- ==========================================================\n\n`;
+
+  sqlDump += `-- Table 1: Master Districts\n`;
+  sqlDump += `CREATE TABLE IF NOT EXISTS regions (\n`;
+  sqlDump += `    region_id TEXT PRIMARY KEY,\n`;
+  sqlDump += `    region_name TEXT NOT NULL,\n`;
+  sqlDump += `    state TEXT NOT NULL,\n`;
+  sqlDump += `    lat REAL NOT NULL,\n`;
+  sqlDump += `    lng REAL NOT NULL\n`;
+  sqlDump += `);\n\n`;
+
+  sqlDump += `-- Table 2: Real-Time Sensor Telemetry Stream\n`;
+  sqlDump += `CREATE TABLE IF NOT EXISTS sensor_telemetry (\n`;
+  sqlDump += `    telemetry_id INTEGER PRIMARY KEY AUTOINCREMENT,\n`;
+  sqlDump += `    region_id TEXT REFERENCES regions(region_id),\n`;
+  sqlDump += `    storage_capacity_pct REAL NOT NULL,\n`;
+  sqlDump += `    groundwater_depth_m REAL NOT NULL,\n`;
+  sqlDump += `    daily_consumption_mld INTEGER NOT NULL,\n`;
+  sqlDump += `    rainfall_anomaly_pct TEXT NOT NULL,\n`;
+  sqlDump += `    risk_status TEXT NOT NULL,\n`;
+  sqlDump += `    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`;
+  sqlDump += `);\n\n`;
+
+  sqlDump += `-- Table 3: 4-Day AI Predictions (Deep's Model Outputs)\n`;
+  sqlDump += `CREATE TABLE IF NOT EXISTS forecast_4days (\n`;
+  sqlDump += `    forecast_id INTEGER PRIMARY KEY AUTOINCREMENT,\n`;
+  sqlDump += `    region_id TEXT REFERENCES regions(region_id),\n`;
+  sqlDump += `    day_name TEXT NOT NULL,\n`;
+  sqlDump += `    predicted_availability REAL NOT NULL,\n`;
+  sqlDump += `    badge_label TEXT NOT NULL\n`;
+  sqlDump += `);\n\n`;
+
+  sqlDump += `-- Table 4: MCDA Risk Weights (Kanika's Research Engine)\n`;
+  sqlDump += `CREATE TABLE IF NOT EXISTS mcda_risk_weights (\n`;
+  sqlDump += `    weight_id INTEGER PRIMARY KEY,\n`;
+  sqlDump += `    parameter_name TEXT NOT NULL,\n`;
+  sqlDump += `    weight_percentage INTEGER NOT NULL\n`;
+  sqlDump += `);\n\n`;
+
+  sqlDump += `-- Initial Seed Data (12 Indian Districts)\n`;
+  entries.forEach(e => {
+    sqlDump += `INSERT INTO regions (region_id, region_name, state, lat, lng) VALUES ('${e.key}', '${e.name}', '${e.state}', ${e.lat}, ${e.lng});\n`;
+    sqlDump += `INSERT INTO sensor_telemetry (region_id, storage_capacity_pct, groundwater_depth_m, daily_consumption_mld, rainfall_anomaly_pct, risk_status) VALUES ('${e.key}', ${e.storageLevel.value}, ${parseFloat(e.groundwaterDepth.value) || 30.0}, ${parseInt(e.dailyConsumption) || 500}, '${e.rainfallAnomaly}', '${e.status}');\n`;
+  });
+
+  const blob = new Blob([sqlDump], { type: "text/sql;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `akansha_water_intelligence_schema_${Date.now()}.sql`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+
+</script>
+</body>
+</html>
+
